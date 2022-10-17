@@ -1,0 +1,14 @@
+---
+title: "Aplicación de pruebas: primer semestre"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+---
+
+# Prueba
+
+## Prueba dos
+
+### Prueba tres
