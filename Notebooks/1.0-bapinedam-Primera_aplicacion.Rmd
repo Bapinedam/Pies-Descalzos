@@ -1,0 +1,255 @@
+---
+title: "Análisis de resultados: Primera aplicación"
+output: 
+  pdf_document:
+    toc: yes
+---
+
+# Introducción
+
+Este documento tiene como objetivo reportar el análisis de resultados psicométricos
+y pre-post de la aplicación de pruebas de Actitudes, Funciones ejecutivas, Motivación 
+y Habilidades socioemocionales, realizados en el marco del Proyecto de evaluación
+del Plan Todo al Cole desarrollado por la Fundación Pies Descalzos.
+
+El análisis psicométrico consiste en la obtención de indicadores de calidad de los ítems y pruebas. 
+Los indicadores utilizado se listan a continuación:
+
+_Ítems dicotómicos_
+
+- _Sample.SD_ representa la desviación estándar del ítem.
+- _Item.total_ muestra la correlación ítem-total.
+- _Item.Tot.woi_ representa la correlación del ítem con el total de la prueba, excluyendo al ítem en cuestión. Este indicador está muy ligado a la confiabilidad, por lo que valores inferiores a .10 no son deseados, y valores negativos representan ítems con problemas.
+- _Difficulty_ la dificultad según la TCT. Para este caso, lo mejor sería que los indicadores se encontraran entre el 0.10 y el 0.90
+- _Discrimination_ la disriminación entre tercios. Se recomiendan valores superiores a 0.20
+- _Item.Reliab_ la confiabilidad del ítem. Su función es medir la contribución del ítem a la medida final del test.
+- _Item.Rel.woi_ la confiabilidad del ítem, excluyendo al ítem en el total del test utilizado en la fórmula. Su función es medir la contribución del ítem a la medida final del test. Este indicador es interesante a la hora de mezclar ítems de ambas formas de prueba ya que da una guía de su posible comportamiento.
+
+_Ítems en escala likert_
+
+- _Dificulty_: Dificultad desde TCT
+- _Mean_: Media del ítem
+- _SD_: Desviación estandar del ítem
+- _Prop.max.score_: La proporción de sujetos que escogió la máxima categoría	
+- _RIR_: Correlación entre el ítem y el resultado de la prueba sin contar el ítem.	
+- _RIT_: Correlación entre el ítem y el resultado de la prueba	
+- _ULI_: Discriminación upper-lower	
+- _Alpha.drop_: Alpha de Cronbach sin el ítem	
+- _Index.rel_: Índice de confiabilidad del ítem
+
+Adicionalmente, se realizó un análisis pre y post de los resultados de los estudiantes en las pruebas.
+Dicho análisis consistió en una comparación de medias para muestras relacionadas, mediante
+la prueba _W de Wilcoxon_, así también se estimó el tamaño del efecto mediante el estadístico
+_d de Cohen_. 
+
+```{r, message=FALSE, warning=FALSE}
+
+## Librerías
+
+# Datos
+
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(googlesheets4)
+library(stringr)
+
+# Análsis de datos
+library(likert)
+library(nortest)
+library(effsize)
+library(psychometric)
+library(ShinyItemAnalysis)
+
+#Graficas
+library(ggplot2)
+library(gt)
+library(DT)
+
+#Funciones propias
+
+source("./Functions/min_max_scaler.R")
+source("./Functions/calificacion.R")
+
+# Otros
+options(digits=5, scipen = 50)
+set.seed(321)
+# rmarkdown::render(input="1.0-bapinedam-Primera_aplicacion.Rmd",
+#                   output_file = "../Pdf/Resultados primera aplicacion.pdf")
+
+```
+
+# Obtención de datos
+
+Para este proyecto las bases de datos se obtienen directamente desde internet, especificamente, desde google drive, debido a que pueden agregarse datos y es necesario que cada vez que se ejecute el script, los datos estén actualizados.
+
+```{r, message=FALSE}
+# Data
+
+### Autenticación de usuario
+
+gs4_auth()
+
+```
+
+```{r, message=FALSE}
+# pre
+
+### Obtención de los datos
+
+url_pre = "https://docs.google.com/spreadsheets/d/1Ry73ckzruTQxtDnkCSscs16M3cv3u9XgJlcg4sN94BE/edit?usp=sharing"
+sheet_names(url_pre)
+
+```
+
+```{r, message=FALSE}
+# post
+
+url_post = "https://docs.google.com/spreadsheets/d/1tFkxbH5N9HMr5qRA-VF4JXh-MAJqW38-iidB4QBuKU4/edit#gid=1877736074"
+sheet_names(url_post)
+```
+
+# Análisis de datos
+
+## Actitudes
+
+En el caso de la prueba pre de actitudes, todas las claves con la B, es por ello que podemos calificar siguiendo la instrucción: Si es B entonces 1, si no, entonces 0.
+
+```{r, message=FALSE}
+# Pre
+actitudes_pre = read_sheet(url_pre, sheet = "Actitudes")
+actitudes_pre = actitudes_pre[,1:15]
+
+col_items = paste(rep("Grupo", 9), rep(1:3, each = 3), rep(paste("_", rep(1:3, 3))))
+
+vector = c(colnames(actitudes_pre)[1:6], col_items)
+colnames(actitudes_pre) = vector
+
+actitudes_pre = filter(actitudes_pre,
+                        !is.na(`Código`),
+                        !is.na(`Grupo 1 _ 1`),
+                        `Grupo 1 _ 1` %in% c("A", "B", "O", "X"))
+dim(actitudes_pre)
+
+actitudes_pre[,7:15] = apply(actitudes_pre[,7:15], 2, function(x) str_to_upper(x))
+
+actitudes_pre[,7:15] = apply(actitudes_pre[,7:15], 2, 
+                             function(x) {ifelse(x == "B", 1, 0)})
+```
+
+En el caso de la prueba ppost de actitudes, no todos los ítems tienen la misma clave. Es por ello que creamos una función que tome un vector con las claves y nos califique una a una las columnas.
+
+```{r, message=FALSE}
+actitudes_post = read_sheet(url_post, sheet = "Actitudes")
+actitudes_post = actitudes_post[,1:15]
+
+col_items = paste(rep("Grupo", 9), rep(1:3, each = 3), rep(paste("_", rep(1:3, 3))))
+
+vector = c(colnames(actitudes_post)[1:6], col_items)
+colnames(actitudes_post) = vector
+
+actitudes_post[,7:15] = apply(actitudes_post[,7:15], 2, function(x) as.character(x))
+
+
+
+actitudes_post = filter(actitudes_post,
+                       !is.na(`Código`),
+                       !is.na(`Grupo 1 _ 1`),
+                       `Grupo 1 _ 1` %in% c("A", "B", "O", "X"))
+
+actitudes_post[,7:15] = apply(actitudes_post[,7:15], 2, function(x) str_to_upper(x))
+
+claves_matematicas = c('B','A','A','A','A','B','A','A','B') 
+
+claves_lenguaje = c('A','A','B','B','A','A','A','B','A') 
+
+```
+
+### Actitudes hacia el lenguaje
+
+Todos los estudiantes tienen un código. Si el mismo empieza en 1, es porque el estudiante estuvo en el programa de lenguaje, si tiene dos, es porque estuvo en el programa de mejora de matemáticas. En este caso filtramos por el 1.
+
+```{r}
+actitudes_lenguaje_pre = filter(actitudes_pre, substr(`Código`, 1, 1) == "1")
+actitudes_lenguaje_post = filter(actitudes_post, substr(`Código`, 1, 1) == "1")
+```
+
+```{r}
+# Calificación post
+actitudes_lenguaje_post[,7:15] = calificacion(actitudes_lenguaje_post[,7:15],
+                                              claves_lenguaje)
+```
+
+
+Finalmente, ya que tenemos calificados todos los ítems, obtenemos puntuaciones generales.
+
+```{r}
+# Calificación
+
+# Total
+
+actitudes_lenguaje_pre$Total_pre = apply(actitudes_lenguaje_pre[,7:15], 1, 
+                                         function(x) sum(x, na.rm= FALSE))
+actitudes_lenguaje_post$Total_post = apply(actitudes_lenguaje_post[,7:15], 1, 
+                                           function(x) sum(x, na.rm= FALSE))
+
+# Afectivo
+
+actitudes_lenguaje_pre$Afectivo_pre = apply(actitudes_lenguaje_pre[,c(7, 10, 13)], 1,
+                                            function(x) sum(x, na.rm= FALSE))
+actitudes_lenguaje_post$Afectivo_post = apply(actitudes_lenguaje_post[,c(7, 10, 13)], 1,
+                                              function(x) sum(x, na.rm= FALSE))
+
+# Cognitivo
+
+actitudes_lenguaje_pre$Cognitivo_pre = apply(actitudes_lenguaje_pre[,c(8, 11, 14)], 1,
+                                             function(x) sum(x, na.rm= FALSE))
+actitudes_lenguaje_post$Cognitivo_post = apply(actitudes_lenguaje_post[,c(8, 11, 14)], 1,
+                                               function(x) sum(x, na.rm= FALSE))
+
+# Conativo
+
+actitudes_lenguaje_pre$Conativo_pre = apply(actitudes_lenguaje_pre[,c(9, 12, 15)], 1,
+                                            function(x) sum(x, na.rm= FALSE))
+actitudes_lenguaje_post$Conativo_post = apply(actitudes_lenguaje_post[,c(9, 12, 15)], 1,
+                                              function(x) sum(x, na.rm= FALSE))
+
+# Matriz pre y post para comparación de muestras
+
+pre_post = inner_join(actitudes_lenguaje_post, 
+                      dplyr::select(actitudes_lenguaje_pre, c("Código", 
+                                                              "Total_pre", 
+                                                              "Afectivo_pre",
+                                                              "Cognitivo_pre",
+                                                              "Conativo_pre")),
+                      by = "Código")
+```
+
+**Estadísticos psicométricos**
+
+#### Alpha
+
+##### Total pre
+
+```{r}
+alpha(actitudes_lenguaje_pre[,7:15])
+
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,7:15])))){
+    x = alpha(actitudes_lenguaje_pre[,7:15][,-i])
+    print(paste("El índice de confiabilidad cambia a", round(x, 2), "al eliminar el ítem",
+                colnames(actitudes_lenguaje_pre[,7:15])[i]))
+}
+```
+
+##### Total post
+
+```{r}
+alpha(actitudes_lenguaje_post[,7:15])
+
+for(i in seq(length(colnames(actitudes_lenguaje_post[,7:15])))){
+    x = alpha(actitudes_lenguaje_post[,7:15][,-i])
+    print(paste("El índice de confiabilidad cambia a", round(x, 2), "al eliminar el ítem",
+                colnames(actitudes_lenguaje_post[,7:15])[i]))
+}
+```
+
