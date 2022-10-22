@@ -3,6 +3,7 @@ title: "Análisis de resultados: Primera aplicación"
 output: 
   pdf_document:
     toc: yes
+    toc_depth: 5
 ---
 
 # Introducción
@@ -97,7 +98,9 @@ gs4_auth()
 
 ### Obtención de los datos
 
-url_pre = "https://docs.google.com/spreadsheets/d/1Ry73ckzruTQxtDnkCSscs16M3cv3u9XgJlcg4sN94BE/edit?usp=sharing"
+url_pre = paste("https://docs.google.com/spreadsheets/d",
+                "/1Ry73ckzruTQxtDnkCSscs16M3cv3u9XgJlcg4sN94BE/edit?usp=sharing",
+                sep = "")
 sheet_names(url_pre)
 
 ```
@@ -105,7 +108,9 @@ sheet_names(url_pre)
 ```{r, message=FALSE}
 # post
 
-url_post = "https://docs.google.com/spreadsheets/d/1tFkxbH5N9HMr5qRA-VF4JXh-MAJqW38-iidB4QBuKU4/edit#gid=1877736074"
+url_post = paste("https://docs.google.com/spreadsheets/d/",
+                 "1tFkxbH5N9HMr5qRA-VF4JXh-MAJqW38-iidB4QBuKU4/edit#gid=1877736074",
+                 sep = "")
 sheet_names(url_post)
 ```
 
@@ -253,3 +258,2196 @@ for(i in seq(length(colnames(actitudes_lenguaje_post[,7:15])))){
 }
 ```
 
+```{r}
+# Creamos una base para guardar los valores alpha generales
+
+alfa = data.frame(matrix(ncol = 2))
+colnames(alfa) = c("Prueba", "Alfa")
+
+
+# Amacenamos los valores
+
+alfa = rbind(alfa,
+             c("Actitudes lenguaje pre",
+               alpha(actitudes_lenguaje_pre[,7:15])))
+
+alfa = rbind(alfa,
+             c("Actitudes lenguaje post",
+               alpha(actitudes_lenguaje_post[,7:15])))
+
+alfa
+
+```
+
+
+##### Componente cognitivo pre
+
+```{r}
+alpha(actitudes_lenguaje_pre[,c(8, 11, 14)])
+
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(8, 11, 14)])))){
+  x = alpha(actitudes_lenguaje_pre[,c(8, 11, 14)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_lenguaje_pre[,c(8, 11, 14)])[i]))
+}
+```
+
+##### Componente cognitivo post
+
+```{r}
+alpha(actitudes_lenguaje_post[,c(8, 11, 14)])
+for(i in seq(length(colnames(actitudes_lenguaje_post[,c(8, 11, 14)])))){
+  x = alpha(actitudes_lenguaje_post[,c(8, 11, 14)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_lenguaje_post[,c(8, 11, 14)])[i]))
+}
+```
+
+
+
+##### Componente afectivo pre
+
+```{r}
+alpha(actitudes_lenguaje_pre[,c(7, 10, 13)])
+
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(7, 10, 13)])))){
+  x = alpha(actitudes_lenguaje_pre[,c(7, 10, 13)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_lenguaje_pre[,c(7, 10, 13)])[i]))
+}
+```
+
+##### Componente afectivo post
+
+```{r}
+alpha(actitudes_lenguaje_post[,c(7, 10, 13)])
+
+for(i in seq(length(colnames(actitudes_lenguaje_post[,c(7, 10, 13)])))){
+  x = alpha(actitudes_lenguaje_post[,c(7, 10, 13)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_lenguaje_post[,c(7, 10, 13)])[i]))
+}
+```
+
+##### Componente conativo pre
+
+```{r}
+alpha(actitudes_lenguaje_pre[,c(9, 12, 15)])
+
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(9, 12, 15)])))){
+  x = alpha(actitudes_lenguaje_pre[,c(9, 12, 15)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_lenguaje_pre[,c(9, 12, 15)])[i]))
+}
+```
+
+##### Componente conativo post
+
+```{r}
+alpha(actitudes_lenguaje_post[,c(9, 12, 15)])
+
+for(i in seq(length(colnames(actitudes_lenguaje_post[,c(9, 12, 15)])))){
+  x = alpha(actitudes_lenguaje_post[,c(9, 12, 15)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_lenguaje_post[,c(9, 12, 15)])[i]))
+}
+```
+
+#### Indicadores psicométricos
+
+##### Total pre
+
+```{r}
+analitem = item.exam(actitudes_lenguaje_pre[,7:15], discrim=T)
+analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
+cols_num = colnames(analitem)
+analitem$Item = row.names(analitem)
+analitem %>%
+  gt(rowname_col = "Item") %>%
+  fmt_number(
+    columns = cols_num,
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(align="center", weight="bold")
+    ),
+    locations=cells_column_labels()
+  )%>%
+  tab_style(
+    style = list(
+      cell_text(align="center")
+    ),
+    locations = cells_body())
+```
+
+```{r}
+# Creamos una base para guardar indicadores
+
+indicadores_psicometricos = data.frame()
+
+# Guardamos los indicadores importantes
+
+psicometricos_pre = analitem %>%
+  dplyr::select(c("Difficulty", "Discrimination")) %>%
+  mutate(Prueba = "Actitudes hacia el lenguaje - Pre") %>%
+  mutate(Item = row.names(.))
+
+indicadores_psicometricos = rbind(indicadores_psicometricos, 
+                                  psicometricos_pre)
+  
+```
+
+##### Total post
+
+```{r}
+analitem = item.exam(actitudes_lenguaje_post[,7:15], discrim=T)
+analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
+cols_num = colnames(analitem)
+analitem$Item = row.names(analitem)
+analitem %>%
+  gt(rowname_col = "Item") %>%
+  fmt_number(
+    columns = cols_num,
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(align="center", weight="bold")
+    ),
+    locations=cells_column_labels()
+  )%>%
+  tab_style(
+    style = list(
+      cell_text(align="center")
+    ),
+    locations = cells_body())
+```
+
+```{r}
+# Guardamos los indicadores importantes
+
+psicometricos_post = analitem %>%
+  dplyr::select(c("Difficulty", "Discrimination")) %>%
+  mutate(Prueba = "Actitudes hacia el lenguaje - Post") %>%
+  mutate(Item = row.names(.))
+
+indicadores_psicometricos = rbind(indicadores_psicometricos, 
+                                  psicometricos_pre)
+```
+
+#### Comparación pre-post
+
+Pese a que la mayoría de las pruebas conservan el mismo número de preguntas finales,
+no es el caso para todas. Es por eso que, con el fin de permitir la comparación entre
+las pruebas pre y post, haremos un escalamiento min-max tal que todas las puntuaciones queden entre 0 y 1.
+
+##### Prueba total
+
+```{r}
+pre_post$Total_pre = min_max_scale(pre_post$Total_pre)
+pre_post$Total_post = min_max_scale(pre_post$Total_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Total_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Total_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Total_pre", "Total_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Total_pre,
+    y           = pre_post$Total_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Total_pre, Total_post) %>%
+  pivot_longer(cols = c(Total_pre, Total_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_lenguaje.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Total_post, pre_post$Total_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Creamos una base para ir guardando los descriptivo
+
+descriptivos = data.frame()
+
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia el lenguaje") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Adicioalmente, guardaremos en otra tabla las comparaciones
+
+comparaciones = data.frame()
+
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia el lenguaje - Total",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+##### Componente afectivo
+
+```{r}
+pre_post$Afectivo_pre = min_max_scale(pre_post$Afectivo_pre)
+pre_post$Afectivo_post = min_max_scale(pre_post$Afectivo_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Afectivo_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Afectivo_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Afectivo_pre",
+                                                    "Afectivo_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Afectivo_pre", "Afectivo_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Afectivo_pre,
+    y           = pre_post$Afectivo_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Afectivo_pre, Afectivo_post) %>%
+  pivot_longer(cols = c(Afectivo_pre, Afectivo_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_lenguaje_afectivo.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Afectivo_post, pre_post$Afectivo_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia el lenguaje - Afectivo") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia el lenguaje - Afectivo",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+##### Componente Cognitivo
+
+```{r}
+pre_post$Cognitivo_pre = min_max_scale(pre_post$Cognitivo_pre)
+pre_post$Cognitivo_post = min_max_scale(pre_post$Cognitivo_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Cognitivo_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Cognitivo_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Cognitivo_pre",
+                                                    "Cognitivo_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Cognitivo_pre", "Cognitivo_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Cognitivo_pre,
+    y           = pre_post$Cognitivo_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Cognitivo_pre, Cognitivo_post) %>%
+  pivot_longer(cols = c(Cognitivo_pre, Cognitivo_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_lenguaje_cognitivo.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Cognitivo_post, pre_post$Cognitivo_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia el lenguaje - Cognitivo") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia el lenguaje - Cognitivo",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+##### Componente Conativo
+
+```{r}
+pre_post$Conativo_pre = min_max_scale(pre_post$Conativo_pre)
+pre_post$Conativo_post = min_max_scale(pre_post$Conativo_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Conativo_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Conativo_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Conativo_pre",
+                                                    "Conativo_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Conativo_pre", "Conativo_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Conativo_pre,
+    y           = pre_post$Conativo_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Conativo_pre, Conativo_post) %>%
+  pivot_longer(cols = c(Conativo_pre, Conativo_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_lenguaje_conativo.png")
+```
+
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Conativo_post, pre_post$Conativo_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia el lenguaje - Conativo") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia el lenguaje - Conativo",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+### Actitudes hacia las matemáticas
+
+```{r}
+actitudes_matematicas_pre = filter(actitudes_pre, 
+                                   substr(`Código`, 1, 1) == "2")
+actitudes_matematicas_post = filter(actitudes_post, 
+                                    substr(`Código`, 1, 1) == "2")
+```
+
+```{r}
+actitudes_matematicas_post[,7:15] =
+  calificacion(actitudes_matematicas_post[,7:15], 
+               claves_matematicas)
+```
+
+```{r}
+# Calificación
+
+# Total
+
+actitudes_matematicas_pre$Total_pre =
+  apply(actitudes_matematicas_pre[,7:15], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+actitudes_matematicas_post$Total_post =
+  apply(actitudes_matematicas_post[,7:15], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+# Afectivo
+
+actitudes_matematicas_pre$Afectivo_pre =
+  apply(actitudes_matematicas_pre[,c(7, 10, 13)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+actitudes_matematicas_post$Afectivo_post =
+  apply(actitudes_matematicas_post[,c(7, 10, 13)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+# Cognitivo
+
+actitudes_matematicas_pre$Cognitivo_pre =
+  apply(actitudes_matematicas_pre[,c(8, 11, 14)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+actitudes_matematicas_post$Cognitivo_post =
+  apply(actitudes_matematicas_post[,c(8, 11, 14)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+# Conativo
+
+actitudes_matematicas_pre$Conativo_pre =
+  apply(actitudes_matematicas_pre[,c(9, 12, 15)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+actitudes_matematicas_post$Conativo_post =
+  apply(actitudes_matematicas_post[,c(9, 12, 15)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+pre_post = inner_join(actitudes_matematicas_post,
+                      dplyr::select(actitudes_matematicas_pre,
+                                    c("Código", 
+                                      "Total_pre", 
+                                      "Afectivo_pre",
+                                      "Cognitivo_pre", 
+                                      "Conativo_pre")),
+                      by = "Código")
+```
+
+#### Alpha
+
+##### Total pre
+
+```{r}
+alpha(actitudes_matematicas_pre[,7:15])
+
+for(i in seq(length(colnames(actitudes_matematicas_pre[,7:15])))){
+  x = alpha(actitudes_matematicas_pre[,7:15][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem",
+              colnames(actitudes_matematicas_pre[,7:15])[i]))
+}
+```
+
+##### Total post
+
+```{r}
+alpha(actitudes_matematicas_post[,7:15])
+
+for(i in seq(length(colnames(actitudes_matematicas_post[,7:15])))){
+  x = alpha(actitudes_matematicas_post[,7:15][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem",
+              colnames(actitudes_matematicas_post[,7:15])[i]))
+}
+```
+
+```{r}
+# Amacenamos los valores
+
+alfa = rbind(alfa,
+             c("Actitudes matemáticas pre",
+               alpha(actitudes_matematicas_pre[,7:15])))
+
+alfa = rbind(alfa,
+             c("Actitudes matemáticas post",
+               alpha(actitudes_matematicas_post[,7:15])))
+
+alfa
+```
+
+##### Componente cognitivo pre
+
+```{r}
+alpha(actitudes_matematicas_pre[,c(8, 11, 14)])
+
+for(i in seq(length(colnames(actitudes_matematicas_pre[,c(8, 11, 14)])))){
+  x = alpha(actitudes_matematicas_pre[,c(8, 11, 14)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_matematicas_pre[,c(8, 11, 14)])[i]))
+}
+```
+
+##### Componente cognitivo post
+
+```{r}
+alpha(actitudes_matematicas_post[,c(8, 11, 14)])
+for(i in seq(length(colnames(actitudes_matematicas_post[,c(8, 11, 14)])))){
+  x = alpha(actitudes_matematicas_post[,c(8, 11, 14)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_matematicas_post[,c(8, 11, 14)])[i]))
+}
+```
+
+
+
+##### Componente afectivo pre
+
+```{r}
+alpha(actitudes_matematicas_pre[,c(7, 10, 13)])
+
+for(i in seq(length(colnames(actitudes_matematicas_pre[,c(7, 10, 13)])))){
+  x = alpha(actitudes_matematicas_pre[,c(7, 10, 13)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_matematicas_pre[,c(7, 10, 13)])[i]))
+}
+```
+
+##### Componente afectivo post
+
+```{r}
+alpha(actitudes_matematicas_post[,c(7, 10, 13)])
+
+for(i in seq(length(colnames(actitudes_matematicas_post[,c(7, 10, 13)])))){
+  x = alpha(actitudes_matematicas_post[,c(7, 10, 13)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_matematicas_post[,c(7, 10, 13)])[i]))
+}
+```
+
+##### Componente conativo pre
+
+```{r}
+alpha(actitudes_matematicas_pre[,c(9, 12, 15)])
+
+for(i in seq(length(colnames(actitudes_matematicas_pre[,c(9, 12, 15)])))){
+  x = alpha(actitudes_matematicas_pre[,c(9, 12, 15)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_matematicas_pre[,c(9, 12, 15)])[i]))
+}
+```
+
+##### Componente conativo post
+
+```{r}
+alpha(actitudes_matematicas_post[,c(9, 12, 15)])
+
+for(i in seq(length(colnames(actitudes_matematicas_post[,c(9, 12, 15)])))){
+  x = alpha(actitudes_matematicas_post[,c(9, 12, 15)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
+              colnames(actitudes_matematicas_post[,c(9, 12, 15)])[i]))
+}
+```
+
+#### Indicadores psicométricos
+
+##### Total pre
+
+```{r}
+analitem = item.exam(actitudes_matematicas_pre[,7:15], discrim=T)
+analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
+cols_num = colnames(analitem)
+analitem$Item = row.names(analitem)
+analitem %>%
+  gt(rowname_col = "Item") %>%
+  fmt_number(
+    columns = cols_num,
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(align="center", weight="bold")
+    ),
+    locations=cells_column_labels()
+  )%>%
+  tab_style(
+    style = list(
+      cell_text(align="center")
+    ),
+    locations = cells_body())
+```
+
+```{r}
+# Guardamos los indicadores importantes
+
+psicometricos_pre = analitem %>%
+  dplyr::select(c("Difficulty", "Discrimination")) %>%
+  mutate(Prueba = "Actitudes hacia las matematicas - Pre") %>%
+  mutate(Item = row.names(.))
+
+indicadores_psicometricos = rbind(indicadores_psicometricos, 
+                                  psicometricos_pre)
+  
+```
+
+##### Total post
+
+```{r}
+analitem = item.exam(actitudes_matematicas_post[,7:15], discrim=T)
+analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
+cols_num = colnames(analitem)
+analitem$Item = row.names(analitem)
+analitem %>%
+  gt(rowname_col = "Item") %>%
+  fmt_number(
+    columns = cols_num,
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(align="center", weight="bold")
+    ),
+    locations=cells_column_labels()
+  )%>%
+  tab_style(
+    style = list(
+      cell_text(align="center")
+    ),
+    locations = cells_body())
+```
+
+```{r}
+# Guardamos los indicadores importantes
+
+psicometricos_post = analitem %>%
+  dplyr::select(c("Difficulty", "Discrimination")) %>%
+  mutate(Prueba = "Actitudes hacia las matematicas - Post") %>%
+  mutate(Item = row.names(.))
+
+indicadores_psicometricos = rbind(indicadores_psicometricos, 
+                                  psicometricos_pre)
+```
+
+#### Comparación pre-post
+
+Pese a que la mayoría de las pruebas conservan el mismo número de preguntas finales,
+no es el caso para todas. Es por eso que, con el fin de permitir la comparación entre
+las pruebas pre y post, haremos un escalamiento min-max tal que todas las puntuaciones queden entre 0 y 1.
+
+##### Prueba total
+
+```{r}
+pre_post$Total_pre = min_max_scale(pre_post$Total_pre)
+pre_post$Total_post = min_max_scale(pre_post$Total_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Total_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Total_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre",
+                                                      "Total_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Total_pre", "Total_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Total_pre,
+    y           = pre_post$Total_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Total_pre, Total_post) %>%
+  pivot_longer(cols = c(Total_pre, Total_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_matematicas.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Total_post, pre_post$Total_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia las matematicas") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia las matematicas - Total",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+##### Componente afectivo
+
+```{r}
+pre_post$Afectivo_pre = min_max_scale(pre_post$Afectivo_pre)
+pre_post$Afectivo_post = min_max_scale(pre_post$Afectivo_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Afectivo_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Afectivo_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Afectivo_pre",
+                                                    "Afectivo_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Afectivo_pre", "Afectivo_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Afectivo_pre,
+    y           = pre_post$Afectivo_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Afectivo_pre, Afectivo_post) %>%
+  pivot_longer(cols = c(Afectivo_pre, Afectivo_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_matematicas_afectivo.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Afectivo_post, pre_post$Afectivo_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia las matematicas - Afectivo") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia las matematicas - Afectivo",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+##### Componente Cognitivo
+
+```{r}
+pre_post$Cognitivo_pre = min_max_scale(pre_post$Cognitivo_pre)
+pre_post$Cognitivo_post = min_max_scale(pre_post$Cognitivo_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Cognitivo_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Cognitivo_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Cognitivo_pre",
+                                                    "Cognitivo_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Cognitivo_pre", "Cognitivo_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Cognitivo_pre,
+    y           = pre_post$Cognitivo_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Cognitivo_pre, Cognitivo_post) %>%
+  pivot_longer(cols = c(Cognitivo_pre, Cognitivo_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_matematicas_cognitivo.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Cognitivo_post, pre_post$Cognitivo_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia las matematicas - Cognitivo") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia las matematicas - Cognitivo",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+##### Componente Conativo
+
+```{r}
+pre_post$Conativo_pre = min_max_scale(pre_post$Conativo_pre)
+pre_post$Conativo_post = min_max_scale(pre_post$Conativo_post)
+```
+
+
+###### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Conativo_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Conativo_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Conativo_pre",
+                                                    "Conativo_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Conativo_pre", "Conativo_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Conativo_pre,
+    y           = pre_post$Conativo_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Conativo_pre, Conativo_post) %>%
+  pivot_longer(cols = c(Conativo_pre, Conativo_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/actitudes_matematicas_conativo.png")
+```
+
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Conativo_post, pre_post$Conativo_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Actitudes hacia las matematicas - Conativo") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Actitudes hacia las matematicas - Conativo",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+
+
+## Motivación
+
+```{r, message=FALSE}
+# Motivación Pre
+motivacion_pre = read_sheet(url_pre, sheet = "Motivación")
+motivacion_pre = motivacion_pre[,1:18]
+
+motivacion_pre = filter(motivacion_pre,
+                       !is.na(`Código`),
+                       !is.na(`1`))
+
+motivacion_pre[,7:18] = apply(motivacion_pre[,7:18], 2, 
+                              function(x) str_to_upper(x))
+
+motivacion_pre[,7:18] = apply(motivacion_pre[,7:18], 2, 
+                              function(x) {ifelse(x == "A", 1, 0)})
+
+# Motivación Post
+
+motivacion_post = read_sheet(url_post, sheet = "Motivación")
+motivacion_post = motivacion_post[,1:16]
+
+motivacion_post = filter(motivacion_post,
+                       !is.na(`Código`),
+                       !is.na(`1`))
+
+motivacion_post[,7:16] = apply(motivacion_post[,7:16], 2, 
+                               function(x) str_to_upper(x))
+
+claves_motivacion_post = c("B", "A", "A", "B", "B", "B", "B", "B", "A", "A")
+
+calificacion = function(data, claves){
+  for(i in 1:dim(data)[2]){
+    data[,i] = apply(data[,i], 1, 
+                     function(x) {ifelse(x == claves[i], 1, 0)})
+  }
+  data
+}
+
+motivacion_post[,7:16] = calificacion(motivacion_post[,7:16], claves_motivacion_post)
+```
+
+```{r}
+# Calificación
+
+# General
+
+motivacion_pre$Total_pre = apply(motivacion_pre[,7:18], 1, 
+                                   function(x) sum(x, na.rm= FALSE))
+
+motivacion_post$Total_post = apply(motivacion_post[,7:16], 1, 
+                                     function(x) sum(x, na.rm= FALSE))
+
+# Interés
+
+motivacion_pre$Interes_pre = apply(motivacion_pre[,c(7,10,13,16)], 1, 
+                                   function(x) sum(x, na.rm= FALSE))
+
+motivacion_post$Interes_post = apply(motivacion_post[,c(7,10,13)], 1, 
+                                     function(x) sum(x, na.rm= FALSE))
+
+
+## Metas
+
+# Orientación al aprendizaje
+
+motivacion_pre$Orientacion_Aprendizaje_pre = apply(motivacion_pre[,c(8,11,14,17)], 1,
+                                                   function(x) sum(x, na.rm= FALSE))
+
+motivacion_post$Orientacion_Aprendizaje_post = apply(motivacion_post[,c(8,11,15)], 1,
+                                                     function(x) sum(x, na.rm= FALSE))
+
+# Orientación al resultado
+
+motivacion_pre$Orientacion_Resultado_pre = 4 - motivacion_pre$Orientacion_Aprendizaje_pre
+motivacion_post$Orientacion_Resultado_post = 3 - motivacion_post$Orientacion_Aprendizaje_post
+
+# Atribución interna
+
+motivacion_pre$Atribucion_interna_pre = apply(motivacion_pre[,c(15,18)], 1, 
+                                              function(x) sum(x, na.rm= FALSE))
+
+motivacion_post$Atribucion_interna_post = apply(motivacion_post[,c(9,16)], 1, 
+                                                function(x) sum(x, na.rm= FALSE))
+
+# Atribución externa
+
+motivacion_pre$Atribucion_externa_pre = 2 - motivacion_pre$Atribucion_interna_pre
+
+motivacion_post$Atribucion_externa_post = 2 - motivacion_post$Atribucion_interna_post
+
+# Expectativa
+
+motivacion_pre$Expectativa_pre = apply(motivacion_pre[,c(9,12)], 1, 
+                                       function(x) sum(x, na.rm= FALSE))
+
+motivacion_post$Expectativa_post = apply(motivacion_post[,c(12,14)], 1, 
+                                         function(x) sum(x, na.rm= FALSE))
+
+columnas_pre = c("Total_pre",
+                 "Interes_pre",
+                 "Orientacion_Aprendizaje_pre",
+                 "Orientacion_Resultado_pre",
+                 "Atribucion_interna_pre",
+                 "Atribucion_externa_pre",
+                 "Expectativa_pre")
+
+columnas_post = c("Total_post",
+                 "Interes_post",
+                 "Orientacion_Aprendizaje_post",
+                 "Orientacion_Resultado_post",
+                 "Atribucion_interna_post",
+                 "Atribucion_externa_post",
+                 "Expectativa_post")
+
+motivacion_pre[,columnas_pre] = apply(motivacion_pre[,columnas_pre],2, 
+                                      function(x) min_max_scale(x) )
+
+motivacion_post[,columnas_post] = apply(motivacion_post[,columnas_post],2, 
+                                        function(x) min_max_scale(x) )
+
+pre_post = inner_join(motivacion_post,
+                      dplyr::select(motivacion_pre, c("Código", columnas_pre)),
+                      by = "Código")
+```
+
+
+### Alpha
+
+#### Total pre
+
+```{r}
+alpha(motivacion_pre[,7:18])
+
+for(i in seq(length(colnames(motivacion_pre[,7:18])))){
+  x = alpha(motivacion_pre[,7:18][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_pre[,7:18])[i]))
+}
+```
+
+#### Total post
+
+```{r}
+alpha(motivacion_post[,7:16])
+
+for(i in seq(length(colnames(motivacion_post[,7:16])))){
+  x = alpha(motivacion_post[,7:16][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_post[,7:16])[i]))
+}
+```
+
+```{r}
+# Amacenamos los valores
+
+alfa = rbind(alfa,
+             c("Motivación pre",
+               alpha(motivacion_pre[,7:18])))
+
+alfa = rbind(alfa,
+             c("Motivación post",
+               alpha(motivacion_post[,7:16])))
+
+alfa
+```
+
+
+#### Interés pre
+
+```{r}
+alpha(motivacion_pre[,c("1","4","7","10")])
+
+for(i in seq(length(colnames(motivacion_pre[,c("1","4","7","10")])))){
+  x = alpha(motivacion_pre[,c("1","4","7","10")][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_pre[,c("1","4","7","10")])[i]))
+}
+```
+
+#### Interés post
+
+```{r}
+alpha(motivacion_post[,c(7,10,13)])
+
+for(i in seq(length(colnames(motivacion_post[,c(7,10,13)])))){
+  x = alpha(motivacion_post[,c(7,10,13)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_post[,c(7,10,13)])[i]))
+}
+```
+
+#### Metas pre
+
+```{r}
+alpha(motivacion_pre[,c("2","5","8","11")])
+
+for(i in seq(length(colnames(motivacion_pre[,c("2","5","8","11")])))){
+  x = alpha(motivacion_pre[,c("2","5","8","11")][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_pre[,c("2","5","8","11")])[i]))
+}
+```
+
+#### Metas post
+
+```{r}
+alpha(motivacion_post[,c(8,11,15)])
+
+for(i in seq(length(colnames(motivacion_post[,c(8,11,15)])))){
+  x = alpha(motivacion_post[,c(8,11,15)][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_post[,c(8,11,15)])[i]))
+}
+```
+
+#### Expectativas
+
+Este sólo está en el pre, ya que en el post la escala se subdividió
+
+```{r}
+alpha(motivacion_pre[,c("3","6","9","12")])
+
+for(i in seq(length(colnames(motivacion_pre[,c("3","6","9","12")])))){
+  x = alpha(motivacion_pre[,c("3","6","9","12")][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_pre[,c("3","6","9","12")])[i]))
+}
+```
+
+#### Atribución interna
+
+```{r}
+alpha(motivacion_post[,c(9,16)])
+```
+No puede obtener el indicador al eliminar un ítem, ya que si queda un único ítem el indicador no tiene solución.
+
+#### Expectativa positiva
+
+```{r}
+alpha(motivacion_post[,c(12,14)])
+```
+
+### Indicadores psicométricos
+
+#### Total pre
+
+```{r}
+analitem = item.exam(motivacion_pre[,7:18], discrim=T)
+analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
+cols_num = colnames(analitem)
+analitem$Item = row.names(analitem)
+analitem %>%
+  gt(rowname_col = "Item") %>%
+  fmt_number(
+    columns = cols_num,
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(align="center", weight="bold")
+    ),
+    locations=cells_column_labels()
+  )%>%
+  tab_style(
+    style = list(
+      cell_text(align="center")
+    ),
+    locations = cells_body())
+```
+
+```{r}
+# Guardamos los indicadores importantes
+
+psicometricos_pre = analitem %>%
+  dplyr::select(c("Difficulty", "Discrimination")) %>%
+  mutate(Prueba = "Motivación - Pre") %>%
+  mutate(Item = row.names(.))
+
+indicadores_psicometricos = rbind(indicadores_psicometricos, 
+                                  psicometricos_pre)
+  
+```
+
+#### Total post
+
+```{r}
+analitem = item.exam(motivacion_post[,7:16], discrim=T)
+analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
+cols_num = colnames(analitem)
+analitem$Item = row.names(analitem)
+analitem %>%
+  gt(rowname_col = "Item") %>%
+  fmt_number(
+    columns = cols_num,
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(align="center", weight="bold")
+    ),
+    locations=cells_column_labels()
+  )%>%
+  tab_style(
+    style = list(
+      cell_text(align="center")
+    ),
+    locations = cells_body())
+```
+
+```{r}
+# Guardamos los indicadores importantes
+
+psicometricos_pre = analitem %>%
+  dplyr::select(c("Difficulty", "Discrimination")) %>%
+  mutate(Prueba = "Motivación - Post") %>%
+  mutate(Item = row.names(.))
+
+indicadores_psicometricos = rbind(indicadores_psicometricos, 
+                                  psicometricos_pre)
+  
+```
+
+
+### Comparación pre-post
+
+#### Prueba total
+
+##### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Total_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Total_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre",
+                                                      "Total_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Total_pre", "Total_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Total_pre,
+    y           = pre_post$Total_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Total_pre, Total_post) %>%
+  pivot_longer(cols = c(Total_pre, Total_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/motivacion.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Total_post, pre_post$Total_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Motivación") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Motivación - Total",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+
+
+#### Interés
+
+##### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Interes_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Interes_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+###### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Interes_pre",
+                                                      "Interes_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Interes_pre", "Interes_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+###### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Interes_pre,
+    y           = pre_post$Interes_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Interes_pre, Interes_post) %>%
+  pivot_longer(cols = c(Interes_pre, Interes_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/motivacion_interes.png")
+```
+
+###### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Interes_post, pre_post$Interes_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Motivación - Interés") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Motivación - Interés",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+#### Metas
+
+##### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Orientacion_Resultado_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Orientacion_Resultado_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+##### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Orientacion_Resultado_pre",
+                                                      "Orientacion_Resultado_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Orientacion_Resultado_pre", "Orientacion_Resultado_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+##### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Orientacion_Resultado_pre,
+    y           = pre_post$Orientacion_Resultado_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Orientacion_Resultado_pre, Orientacion_Resultado_post) %>%
+  pivot_longer(cols = c(Orientacion_Resultado_pre, Orientacion_Resultado_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/motivacion_metas_resultado.png")
+```
+
+##### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Orientacion_Resultado_post, 
+          pre_post$Orientacion_Resultado_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Motivación - Metas") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Motivación - Metas",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+#### Atribución externa
+
+```{r}
+pre_post$Atribucion_externa_pre = 1 - pre_post$Atribucion_interna_pre
+pre_post$Atribucion_externa_post = 1 - pre_post$Atribucion_interna_post
+```
+
+
+##### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Atribucion_externa_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Atribucion_externa_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+##### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Atribucion_externa_pre",
+                                                      "Atribucion_externa_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Atribucion_externa_pre", "Atribucion_externa_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+##### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Atribucion_externa_pre,
+    y           = pre_post$Atribucion_externa_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Atribucion_externa_pre, Atribucion_externa_post) %>%
+  pivot_longer(cols = c(Atribucion_externa_pre, Atribucion_externa_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/motivacion_atribucion_externa.png")
+```
+
+##### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Atribucion_externa_post, 
+          pre_post$Atribucion_externa_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Motivación - Atribución externa") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Motivación - Atribución externa",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```
+
+#### Expectativas positivas
+
+##### Estadísticos de normalidad
+
+```{r}
+print("Estadístico de normalidad pre")
+
+lillie.test(pre_post$Expectativa_pre)
+
+
+print("Estadístico de normalidad post")
+
+lillie.test(pre_post$Expectativa_post)
+```
+
+Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
+
+##### Descriptivos
+
+```{r}
+summ = data.frame(unclass(psych::describe(pre_post[,c("Expectativa_pre",
+                                                      "Expectativa_post")])), 
+                  check.names = FALSE, stringsAsFactors = FALSE) 
+
+summ$vars = c("Expectativa_pre", "Expectativa_post")
+
+summ[,1:10] %>%
+  gt()
+```
+
+##### Comparación de medias
+
+```{r}
+comparacion = 
+  wilcox.test(
+    x           = pre_post$Expectativa_pre,
+    y           = pre_post$Expectativa_post,
+    alternative = "two.sided",
+    mu          = 0,
+    var.equal   = TRUE,
+    paired      = TRUE,
+    conf.level  = 0.95
+  )
+
+comparacion
+```
+
+```{r}
+pre_post %>%
+  dplyr::select(Expectativa_pre, Expectativa_post) %>%
+  pivot_longer(cols = c(Expectativa_pre, Expectativa_post), 
+               values_to = "value", 
+               names_to = "Aplicación") %>%
+  ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
+  geom_violin(trim=FALSE) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Aplicación") + ylab("")+ 
+  stat_summary(fun.data=mean_sdl, geom="pointrange", color="red") +
+  geom_jitter(shape=16, position=position_jitter(0.1), alpha=0.5) +
+  scale_x_discrete(labels = c("Pre","Post"))
+```
+
+```{r, message=FALSE}
+# Guardamos la imagen
+
+ggsave("../Plots/motivacion_expectativas.png")
+```
+
+##### Tamaño del efecto
+
+```{r}
+size_effect = 
+  cohen.d(pre_post$Expectativa_post, 
+          pre_post$Expectativa_pre, paired = TRUE)
+
+size_effect
+```
+
+
+```{r}
+# Separamos los descriptivos importantes
+desc = summ[,1:10] %>%
+        dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
+          mutate(Prueba = "Motivación - Expectativas") %>%
+          mutate(`Aplicación` = c("Pre", "Post"))
+
+descriptivos = rbind(descriptivos, desc)
+```
+
+```{r}
+# Guardamos los resultados de esta comparación
+
+data_temp = 
+  data.frame(Prueba = "Motivación - Expectativas",
+             `Media pre` = summ$mean[1],
+             `Media pro` = summ$mean[2],
+             `p value` = comparacion$p.value,
+             `D de cohen` = size_effect$magnitude)
+
+comparaciones = rbind(comparaciones, data_temp)
+
+```

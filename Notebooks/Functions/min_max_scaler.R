@@ -1,4 +1,4 @@
-## 
+## Escalamiento min-max
 
 min_max_scale = function(x){
   
