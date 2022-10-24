@@ -1,5 +1,5 @@
 ---
-title: "Análisis de resultados: Primera aplicación"
+title: "Análisis de resultados: Segunda aplicación"
 output: 
   pdf_document:
     toc: yes
@@ -9,10 +9,12 @@ output:
 fontsize: 11pt
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
 ```
+
 
 \newpage
 
@@ -94,7 +96,7 @@ source("./Functions/change_to_zero.R")
 # Otros
 options(digits=5, scipen = 50)
 set.seed(321)
-# rmarkdown::render(input="1.0-bapinedam-Primera_aplicacion.Rmd",
+# rmarkdown::render(input="1.0-bapinedam-segunda_aplicacion.Rmd",
 #                   output_file = "../Pdf/Resultados primera aplicacion.pdf")
 
 ```
@@ -120,8 +122,8 @@ gs4_auth()
 
 ### Obtención de los datos
 
-url_pre = paste("https://docs.google.com/spreadsheets/d",
-                "/1Ry73ckzruTQxtDnkCSscs16M3cv3u9XgJlcg4sN94BE/edit?usp=sharing",
+url_pre = paste("https://docs.google.com/spreadsheets/d/",
+                "1nmTecdohkKDNcppMfIXT0yrmKnoxIg-ZQZHuIOg3LBA/edit#gid=878062551",
                 sep = "")
 ```
 
@@ -129,7 +131,7 @@ url_pre = paste("https://docs.google.com/spreadsheets/d",
 # post
 
 url_post = paste("https://docs.google.com/spreadsheets/d/",
-                 "1tFkxbH5N9HMr5qRA-VF4JXh-MAJqW38-iidB4QBuKU4/edit#gid=1877736074",
+                 "1n69qyde6BSUWVV5jSv3-sbCRF_gWyErPwatNAqKG9vo/edit#gid=878062551",
                  sep = "")
 ```
 
@@ -145,9 +147,9 @@ En el caso de la prueba pre de actitudes, todas las claves con la B, es por ello
 ```{r, message=FALSE}
 # Pre
 actitudes_pre = read_sheet(url_pre, sheet = "Actitudes")
-actitudes_pre = actitudes_pre[,1:15]
+actitudes_pre = actitudes_pre[,1:18]
 
-col_items = paste(rep("Grupo", 9), rep(1:3, each = 3), rep(paste("_", rep(1:3, 3))))
+col_items = paste(rep("Grupo", 12), rep(1:4, each = 3), rep(paste("_", rep(1:3, 3))))
 
 vector = c(colnames(actitudes_pre)[1:6], col_items)
 colnames(actitudes_pre) = vector
@@ -158,24 +160,26 @@ actitudes_pre = filter(actitudes_pre,
                         `Grupo 1 _ 1` %in% c("A", "B", "O", "X"))
 dim(actitudes_pre)
 
-actitudes_pre[,7:15] = apply(actitudes_pre[,7:15], 2, function(x) str_to_upper(x))
+actitudes_pre[,7:18] = apply(actitudes_pre[,7:18], 2, function(x) str_to_upper(x))
 
-actitudes_pre[,7:15] = apply(actitudes_pre[,7:15], 2, 
-                             function(x) {ifelse(x == "B", 1, 0)})
+claves_lenguaje_pre = c('B','A','A','B','B','A','A','A','B','B','A','B') 
+
+claves_matematicas_pre  = c('B','A','A','B','A','A','A','B','B','A','A','B') 
+
 ```
 
 En el caso de la prueba ppost de actitudes, no todos los ítems tienen la misma clave. Es por ello que creamos una función que tome un vector con las claves y nos califique una a una las columnas.
 
 ```{r, message=FALSE}
 actitudes_post = read_sheet(url_post, sheet = "Actitudes")
-actitudes_post = actitudes_post[,1:15]
+actitudes_post = actitudes_post[,1:18]
 
-col_items = paste(rep("Grupo", 9), rep(1:3, each = 3), rep(paste("_", rep(1:3, 3))))
+col_items = paste(rep("Grupo", 12), rep(1:4, each = 3), rep(paste("_", rep(1:3, 3))))
 
 vector = c(colnames(actitudes_post)[1:6], col_items)
 colnames(actitudes_post) = vector
 
-actitudes_post[,7:15] = apply(actitudes_post[,7:15], 2, function(x) as.character(x))
+actitudes_post[,7:18] = apply(actitudes_post[,7:18], 2, function(x) as.character(x))
 
 
 
@@ -184,11 +188,12 @@ actitudes_post = filter(actitudes_post,
                        !is.na(`Grupo 1 _ 1`),
                        `Grupo 1 _ 1` %in% c("A", "B", "O", "X"))
 
-actitudes_post[,7:15] = apply(actitudes_post[,7:15], 2, function(x) str_to_upper(x))
+actitudes_post[,7:18] = apply(actitudes_post[,7:18], 2, function(x) str_to_upper(x))
 
-claves_matematicas = c('B','A','A','A','A','B','A','A','B') 
 
-claves_lenguaje = c('A','A','B','B','A','A','A','B','A') 
+claves_lenguaje_post = c('A','A','B','B','B','B','B','A','A','A','B','A') 
+
+claves_matematicas_post  = c('B','A','A','A','A','B','A','A','B','B','A','B') 
 
 ```
 
@@ -202,9 +207,13 @@ actitudes_lenguaje_post = filter(actitudes_post, substr(`Código`, 1, 1) == "1")
 ```
 
 ```{r}
+# Calificación pre
+actitudes_lenguaje_pre[,7:18] = calificacion(actitudes_lenguaje_pre[,7:18],
+                                              claves_lenguaje_pre)
+
 # Calificación post
-actitudes_lenguaje_post[,7:15] = calificacion(actitudes_lenguaje_post[,7:15],
-                                              claves_lenguaje)
+actitudes_lenguaje_post[,7:18] = calificacion(actitudes_lenguaje_post[,7:18],
+                                              claves_lenguaje_post)
 ```
 
 
@@ -215,30 +224,31 @@ Finalmente, ya que tenemos calificados todos los ítems, obtenemos puntuaciones 
 
 # Total
 
-actitudes_lenguaje_pre$Total_pre = apply(actitudes_lenguaje_pre[,7:15], 1, 
+actitudes_lenguaje_pre$Total_pre = apply(actitudes_lenguaje_pre[,7:18], 1, 
                                          function(x) sum(x, na.rm= FALSE))
-actitudes_lenguaje_post$Total_post = apply(actitudes_lenguaje_post[,7:15], 1, 
+
+actitudes_lenguaje_post$Total_post = apply(actitudes_lenguaje_post[,7:18], 1, 
                                            function(x) sum(x, na.rm= FALSE))
 
 # Afectivo
 
-actitudes_lenguaje_pre$Afectivo_pre = apply(actitudes_lenguaje_pre[,c(7, 10, 13)], 1,
+actitudes_lenguaje_pre$Afectivo_pre = apply(actitudes_lenguaje_pre[,c(7, 10, 13, 16)], 1,
                                             function(x) sum(x, na.rm= FALSE))
-actitudes_lenguaje_post$Afectivo_post = apply(actitudes_lenguaje_post[,c(7, 10, 13)], 1,
+actitudes_lenguaje_post$Afectivo_post = apply(actitudes_lenguaje_post[,c(7, 10, 13, 16)], 1,
                                               function(x) sum(x, na.rm= FALSE))
 
 # Cognitivo
 
-actitudes_lenguaje_pre$Cognitivo_pre = apply(actitudes_lenguaje_pre[,c(8, 11, 14)], 1,
+actitudes_lenguaje_pre$Cognitivo_pre = apply(actitudes_lenguaje_pre[,c(8, 11, 14, 17)], 1,
                                              function(x) sum(x, na.rm= FALSE))
-actitudes_lenguaje_post$Cognitivo_post = apply(actitudes_lenguaje_post[,c(8, 11, 14)], 1,
+actitudes_lenguaje_post$Cognitivo_post = apply(actitudes_lenguaje_post[,c(8, 11, 14, 17)], 1,
                                                function(x) sum(x, na.rm= FALSE))
 
 # Conativo
 
-actitudes_lenguaje_pre$Conativo_pre = apply(actitudes_lenguaje_pre[,c(9, 12, 15)], 1,
+actitudes_lenguaje_pre$Conativo_pre = apply(actitudes_lenguaje_pre[,c(9, 12, 15, 18)], 1,
                                             function(x) sum(x, na.rm= FALSE))
-actitudes_lenguaje_post$Conativo_post = apply(actitudes_lenguaje_post[,c(9, 12, 15)], 1,
+actitudes_lenguaje_post$Conativo_post = apply(actitudes_lenguaje_post[,c(9, 12, 15, 18)], 1,
                                               function(x) sum(x, na.rm= FALSE))
 
 # Matriz pre y post para comparación de muestras
@@ -292,25 +302,26 @@ pivot_final = pivot_to_bind
 ##### Total pre
 
 ```{r}
-alpha(actitudes_lenguaje_pre[,7:15])
+alpha(actitudes_lenguaje_pre[,7:18])
 
-for(i in seq(length(colnames(actitudes_lenguaje_pre[,7:15])))){
-    x = alpha(actitudes_lenguaje_pre[,7:15][,-i])
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,7:18])))){
+    x = alpha(actitudes_lenguaje_pre[,7:18][,-i])
     print(paste("El índice de confiabilidad cambia a", round(x, 2), 
                 "al eliminar el ítem",
-                colnames(actitudes_lenguaje_pre[,7:15])[i]))
+                colnames(actitudes_lenguaje_pre[,7:18])[i]))
 }
 ```
 
 ##### Total post
 
 ```{r}
-alpha(actitudes_lenguaje_post[,7:15])
+alpha(actitudes_lenguaje_post[,7:18])
 
-for(i in seq(length(colnames(actitudes_lenguaje_post[,7:15])))){
-    x = alpha(actitudes_lenguaje_post[,7:15][,-i])
-    print(paste("El índice de confiabilidad cambia a", round(x, 2), "al eliminar el ítem",
-                colnames(actitudes_lenguaje_post[,7:15])[i]))
+for(i in seq(length(colnames(actitudes_lenguaje_post[,7:18])))){
+    x = alpha(actitudes_lenguaje_post[,7:18][,-i])
+    print(paste("El índice de confiabilidad cambia a", round(x, 2), 
+                "al eliminar el ítem",
+                colnames(actitudes_lenguaje_post[,7:18])[i]))
 }
 ```
 
@@ -325,11 +336,11 @@ colnames(alfa) = c("Prueba", "Alfa")
 
 alfa = rbind(alfa,
              c("Actitudes lenguaje pre",
-               alpha(actitudes_lenguaje_pre[,7:15])))
+               alpha(actitudes_lenguaje_pre[,7:18])))
 
 alfa = rbind(alfa,
              c("Actitudes lenguaje post",
-               alpha(actitudes_lenguaje_post[,7:15])))
+               alpha(actitudes_lenguaje_post[,7:18])))
 
 ```
 
@@ -337,23 +348,23 @@ alfa = rbind(alfa,
 ##### Componente cognitivo pre
 
 ```{r}
-alpha(actitudes_lenguaje_pre[,c(8, 11, 14)])
+alpha(actitudes_lenguaje_pre[,c(8, 11, 14, 17)])
 
-for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(8, 11, 14)])))){
-  x = alpha(actitudes_lenguaje_pre[,c(8, 11, 14)][,-i])
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(8, 11, 14, 17)])))){
+  x = alpha(actitudes_lenguaje_pre[,c(8, 11, 14, 17)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_lenguaje_pre[,c(8, 11, 14)])[i]))
+              colnames(actitudes_lenguaje_pre[,c(8, 11, 14, 17)])[i]))
 }
 ```
 
 ##### Componente cognitivo post
 
 ```{r}
-alpha(actitudes_lenguaje_post[,c(8, 11, 14)])
-for(i in seq(length(colnames(actitudes_lenguaje_post[,c(8, 11, 14)])))){
-  x = alpha(actitudes_lenguaje_post[,c(8, 11, 14)][,-i])
+alpha(actitudes_lenguaje_post[,c(8, 11, 14, 17)])
+for(i in seq(length(colnames(actitudes_lenguaje_post[,c(8, 11, 14, 17)])))){
+  x = alpha(actitudes_lenguaje_post[,c(8, 11, 14, 17)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_lenguaje_post[,c(8, 11, 14)])[i]))
+              colnames(actitudes_lenguaje_post[,c(8, 11, 14, 17)])[i]))
 }
 ```
 
@@ -362,48 +373,48 @@ for(i in seq(length(colnames(actitudes_lenguaje_post[,c(8, 11, 14)])))){
 ##### Componente afectivo pre
 
 ```{r}
-alpha(actitudes_lenguaje_pre[,c(7, 10, 13)])
+alpha(actitudes_lenguaje_pre[,c(7, 10, 13, 16)])
 
-for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(7, 10, 13)])))){
-  x = alpha(actitudes_lenguaje_pre[,c(7, 10, 13)][,-i])
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(7, 10, 13, 16)])))){
+  x = alpha(actitudes_lenguaje_pre[,c(7, 10, 13, 16)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_lenguaje_pre[,c(7, 10, 13)])[i]))
+              colnames(actitudes_lenguaje_pre[,c(7, 10, 13, 16)])[i]))
 }
 ```
 
 ##### Componente afectivo post
 
 ```{r}
-alpha(actitudes_lenguaje_post[,c(7, 10, 13)])
+alpha(actitudes_lenguaje_post[,c(7, 10, 13, 16)])
 
-for(i in seq(length(colnames(actitudes_lenguaje_post[,c(7, 10, 13)])))){
-  x = alpha(actitudes_lenguaje_post[,c(7, 10, 13)][,-i])
+for(i in seq(length(colnames(actitudes_lenguaje_post[,c(7, 10, 13, 16)])))){
+  x = alpha(actitudes_lenguaje_post[,c(7, 10, 13, 16)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_lenguaje_post[,c(7, 10, 13)])[i]))
+              colnames(actitudes_lenguaje_post[,c(7, 10, 13, 16)])[i]))
 }
 ```
 
 ##### Componente conativo pre
 
 ```{r}
-alpha(actitudes_lenguaje_pre[,c(9, 12, 15)])
+alpha(actitudes_lenguaje_pre[,c(9, 12, 15, 18)])
 
-for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(9, 12, 15)])))){
-  x = alpha(actitudes_lenguaje_pre[,c(9, 12, 15)][,-i])
+for(i in seq(length(colnames(actitudes_lenguaje_pre[,c(9, 12, 15, 18)])))){
+  x = alpha(actitudes_lenguaje_pre[,c(9, 12, 15, 18)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_lenguaje_pre[,c(9, 12, 15)])[i]))
+              colnames(actitudes_lenguaje_pre[,c(9, 12, 15, 18)])[i]))
 }
 ```
 
 ##### Componente conativo post
 
 ```{r}
-alpha(actitudes_lenguaje_post[,c(9, 12, 15)])
+alpha(actitudes_lenguaje_post[,c(9, 12, 15, 18)])
 
-for(i in seq(length(colnames(actitudes_lenguaje_post[,c(9, 12, 15)])))){
-  x = alpha(actitudes_lenguaje_post[,c(9, 12, 15)][,-i])
+for(i in seq(length(colnames(actitudes_lenguaje_post[,c(9, 12, 15, 18)])))){
+  x = alpha(actitudes_lenguaje_post[,c(9, 12, 15, 18)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_lenguaje_post[,c(9, 12, 15)])[i]))
+              colnames(actitudes_lenguaje_post[,c(9, 12, 15, 18)])[i]))
 }
 ```
 
@@ -411,8 +422,8 @@ for(i in seq(length(colnames(actitudes_lenguaje_post[,c(9, 12, 15)])))){
 
 ##### Total pre
 
-```{r}
-analitem = item.exam(actitudes_lenguaje_pre[,7:15], discrim=T)
+```{r, warning=FALSE}
+analitem = item.exam(actitudes_lenguaje_pre[,7:18], discrim=T)
 analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
 cols_num = colnames(analitem[,1:6])
 analitem$Item = row.names(analitem)
@@ -454,8 +465,8 @@ indicadores_psicometricos = rbind(indicadores_psicometricos,
 
 ##### Total post
 
-```{r}
-analitem = item.exam(actitudes_lenguaje_post[,7:15], discrim=T)
+```{r, warning=FALSE}
+analitem = item.exam(actitudes_lenguaje_post[,7:18], discrim=T)
 analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
 cols_num = colnames(analitem[,1:6])
 analitem$Item = row.names(analitem)
@@ -567,7 +578,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_lenguaje.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_lenguaje.png")
 ```
 
 ###### Tamaño del efecto
@@ -685,7 +696,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_lenguaje_afectivo.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_lenguaje_afectivo.png")
 ```
 
 ###### Tamaño del efecto
@@ -795,7 +806,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_lenguaje_cognitivo.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_lenguaje_cognitivo.png")
 ```
 
 ###### Tamaño del efecto
@@ -905,7 +916,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_lenguaje_conativo.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_lenguaje_conativo.png")
 ```
 
 
@@ -954,9 +965,16 @@ actitudes_matematicas_post = filter(actitudes_post,
 ```
 
 ```{r}
-actitudes_matematicas_post[,7:15] =
-  calificacion(actitudes_matematicas_post[,7:15], 
-               claves_matematicas)
+# Calificación pre
+
+actitudes_matematicas_pre[,7:18] =
+  calificacion(actitudes_matematicas_pre[,7:18], 
+               claves_matematicas_pre)
+
+# Calificación post
+actitudes_matematicas_post[,7:18] =
+  calificacion(actitudes_matematicas_post[,7:18], 
+               claves_matematicas_post)
 ```
 
 ```{r}
@@ -965,41 +983,41 @@ actitudes_matematicas_post[,7:15] =
 # Total
 
 actitudes_matematicas_pre$Total_pre =
-  apply(actitudes_matematicas_pre[,7:15], 1, 
+  apply(actitudes_matematicas_pre[,7:18], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 actitudes_matematicas_post$Total_post =
-  apply(actitudes_matematicas_post[,7:15], 1, 
+  apply(actitudes_matematicas_post[,7:18], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 # Afectivo
 
 actitudes_matematicas_pre$Afectivo_pre =
-  apply(actitudes_matematicas_pre[,c(7, 10, 13)], 1, 
+  apply(actitudes_matematicas_pre[,c(7, 10, 13, 16)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 actitudes_matematicas_post$Afectivo_post =
-  apply(actitudes_matematicas_post[,c(7, 10, 13)], 1, 
+  apply(actitudes_matematicas_post[,c(7, 10, 13, 16)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 # Cognitivo
 
 actitudes_matematicas_pre$Cognitivo_pre =
-  apply(actitudes_matematicas_pre[,c(8, 11, 14)], 1, 
+  apply(actitudes_matematicas_pre[,c(8, 11, 14, 17)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 actitudes_matematicas_post$Cognitivo_post =
-  apply(actitudes_matematicas_post[,c(8, 11, 14)], 1, 
+  apply(actitudes_matematicas_post[,c(8, 11, 14, 17)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 # Conativo
 
 actitudes_matematicas_pre$Conativo_pre =
-  apply(actitudes_matematicas_pre[,c(9, 12, 15)], 1, 
+  apply(actitudes_matematicas_pre[,c(9, 12, 15, 18)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 actitudes_matematicas_post$Conativo_post =
-  apply(actitudes_matematicas_post[,c(9, 12, 15)], 1, 
+  apply(actitudes_matematicas_post[,c(9, 12, 15, 18)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 pre_post = inner_join(actitudes_matematicas_post,
@@ -1013,36 +1031,7 @@ pre_post = inner_join(actitudes_matematicas_post,
 ```
 
 
-```{r}
-pivot_to_bind = dplyr::select(pre_post, c("Código", "Total_pre",
-                                          "Afectivo_pre",
-                                          "Cognitivo_pre",
-                                          "Conativo_pre",
-                                          "Total_post",
-                                          "Afectivo_pre",
-                                          "Cognitivo_post",
-                                          "Conativo_post"))
 
-pivot_to_bind[,2:ncol(pivot_to_bind)] =
-  apply(pivot_to_bind[,2:ncol(pivot_to_bind)],
-        2, function(x) min_max_scale(x))
-
-pivot_to_bind = 
-  pivot_to_bind %>%
-  pivot_longer(cols = !`Código`,
-               names_to = c("Prueba", "Tipo"),
-               names_sep = "_",
-               values_to = "score")
-
-pivot_to_bind$Prueba = str_replace_all(pivot_to_bind$Prueba,
-                                       c("Total" = "Actitudes hacia las matematicas - Total",
-                                         "Afectivo" = "Actitudes hacia las matematicas - Afectivo",
-                                         "Cognitivo" = "Actitudes hacia las matematicas - Cognitivo",
-                                         "Conativo" = "Actitudes hacia las matematicas - Conativo"))
-
-
-pivot_final = rbind(pivot_final, pivot_to_bind)
-```
 
 
 #### Alpha
@@ -1050,26 +1039,26 @@ pivot_final = rbind(pivot_final, pivot_to_bind)
 ##### Total pre
 
 ```{r}
-alpha(actitudes_matematicas_pre[,7:15])
+alpha(actitudes_matematicas_pre[,7:18])
 
-for(i in seq(length(colnames(actitudes_matematicas_pre[,7:15])))){
-  x = alpha(actitudes_matematicas_pre[,7:15][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_pre[,7:18])))){
+  x = alpha(actitudes_matematicas_pre[,7:18][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem",
-              colnames(actitudes_matematicas_pre[,7:15])[i]))
+              colnames(actitudes_matematicas_pre[,7:18])[i]))
 }
 ```
 
 ##### Total post
 
 ```{r}
-alpha(actitudes_matematicas_post[,7:15])
+alpha(actitudes_matematicas_post[,7:18])
 
-for(i in seq(length(colnames(actitudes_matematicas_post[,7:15])))){
-  x = alpha(actitudes_matematicas_post[,7:15][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_post[,7:18])))){
+  x = alpha(actitudes_matematicas_post[,7:18][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem",
-              colnames(actitudes_matematicas_post[,7:15])[i]))
+              colnames(actitudes_matematicas_post[,7:18])[i]))
 }
 ```
 
@@ -1078,34 +1067,34 @@ for(i in seq(length(colnames(actitudes_matematicas_post[,7:15])))){
 
 alfa = rbind(alfa,
              c("Actitudes matemáticas pre",
-               alpha(actitudes_matematicas_pre[,7:15])))
+               alpha(actitudes_matematicas_pre[,7:18])))
 
 alfa = rbind(alfa,
              c("Actitudes matemáticas post",
-               alpha(actitudes_matematicas_post[,7:15])))
+               alpha(actitudes_matematicas_post[,7:18])))
 
 ```
 
 ##### Componente cognitivo pre
 
 ```{r}
-alpha(actitudes_matematicas_pre[,c(8, 11, 14)])
+alpha(actitudes_matematicas_pre[,c(8, 11, 14, 17)])
 
-for(i in seq(length(colnames(actitudes_matematicas_pre[,c(8, 11, 14)])))){
-  x = alpha(actitudes_matematicas_pre[,c(8, 11, 14)][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_pre[,c(8, 11, 14, 17)])))){
+  x = alpha(actitudes_matematicas_pre[,c(8, 11, 14, 17)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_matematicas_pre[,c(8, 11, 14)])[i]))
+              colnames(actitudes_matematicas_pre[,c(8, 11, 14, 17)])[i]))
 }
 ```
 
 ##### Componente cognitivo post
 
 ```{r}
-alpha(actitudes_matematicas_post[,c(8, 11, 14)])
-for(i in seq(length(colnames(actitudes_matematicas_post[,c(8, 11, 14)])))){
-  x = alpha(actitudes_matematicas_post[,c(8, 11, 14)][,-i])
+alpha(actitudes_matematicas_post[,c(8, 11, 14, 17)])
+for(i in seq(length(colnames(actitudes_matematicas_post[,c(8, 11, 14, 17)])))){
+  x = alpha(actitudes_matematicas_post[,c(8, 11, 14, 17)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_matematicas_post[,c(8, 11, 14)])[i]))
+              colnames(actitudes_matematicas_post[,c(8, 11, 14, 17)])[i]))
 }
 ```
 
@@ -1114,48 +1103,48 @@ for(i in seq(length(colnames(actitudes_matematicas_post[,c(8, 11, 14)])))){
 ##### Componente afectivo pre
 
 ```{r}
-alpha(actitudes_matematicas_pre[,c(7, 10, 13)])
+alpha(actitudes_matematicas_pre[,c(7, 10, 13, 16)])
 
-for(i in seq(length(colnames(actitudes_matematicas_pre[,c(7, 10, 13)])))){
-  x = alpha(actitudes_matematicas_pre[,c(7, 10, 13)][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_pre[,c(7, 10, 13, 16)])))){
+  x = alpha(actitudes_matematicas_pre[,c(7, 10, 13, 16)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_matematicas_pre[,c(7, 10, 13)])[i]))
+              colnames(actitudes_matematicas_pre[,c(7, 10, 13, 16)])[i]))
 }
 ```
 
 ##### Componente afectivo post
 
 ```{r}
-alpha(actitudes_matematicas_post[,c(7, 10, 13)])
+alpha(actitudes_matematicas_post[,c(7, 10, 13, 16)])
 
-for(i in seq(length(colnames(actitudes_matematicas_post[,c(7, 10, 13)])))){
-  x = alpha(actitudes_matematicas_post[,c(7, 10, 13)][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_post[,c(7, 10, 13, 16)])))){
+  x = alpha(actitudes_matematicas_post[,c(7, 10, 13, 16)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_matematicas_post[,c(7, 10, 13)])[i]))
+              colnames(actitudes_matematicas_post[,c(7, 10, 13, 16)])[i]))
 }
 ```
 
 ##### Componente conativo pre
 
 ```{r}
-alpha(actitudes_matematicas_pre[,c(9, 12, 15)])
+alpha(actitudes_matematicas_pre[,c(9, 12, 15, 18)])
 
-for(i in seq(length(colnames(actitudes_matematicas_pre[,c(9, 12, 15)])))){
-  x = alpha(actitudes_matematicas_pre[,c(9, 12, 15)][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_pre[,c(9, 12, 15, 18)])))){
+  x = alpha(actitudes_matematicas_pre[,c(9, 12, 15, 18)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_matematicas_pre[,c(9, 12, 15)])[i]))
+              colnames(actitudes_matematicas_pre[,c(9, 12, 15, 18)])[i]))
 }
 ```
 
 ##### Componente conativo post
 
 ```{r}
-alpha(actitudes_matematicas_post[,c(9, 12, 15)])
+alpha(actitudes_matematicas_post[,c(9, 12, 15, 18)])
 
-for(i in seq(length(colnames(actitudes_matematicas_post[,c(9, 12, 15)])))){
-  x = alpha(actitudes_matematicas_post[,c(9, 12, 15)][,-i])
+for(i in seq(length(colnames(actitudes_matematicas_post[,c(9, 12, 15, 18)])))){
+  x = alpha(actitudes_matematicas_post[,c(9, 12, 15, 18)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, "al eliminar el ítem",
-              colnames(actitudes_matematicas_post[,c(9, 12, 15)])[i]))
+              colnames(actitudes_matematicas_post[,c(9, 12, 15, 18)])[i]))
 }
 ```
 
@@ -1164,7 +1153,7 @@ for(i in seq(length(colnames(actitudes_matematicas_post[,c(9, 12, 15)])))){
 ##### Total pre
 
 ```{r}
-analitem = item.exam(actitudes_matematicas_pre[,7:15], discrim=T)
+analitem = item.exam(actitudes_matematicas_pre[,7:18], discrim=T)
 analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
 cols_num = colnames(analitem[,1:6])
 analitem$Item = row.names(analitem)
@@ -1203,7 +1192,7 @@ indicadores_psicometricos = rbind(indicadores_psicometricos,
 ##### Total post
 
 ```{r}
-analitem = item.exam(actitudes_matematicas_post[,7:15], discrim=T)
+analitem = item.exam(actitudes_matematicas_post[,7:18], discrim=T)
 analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
 cols_num = colnames(analitem[,1:6])
 analitem$Item = row.names(analitem)
@@ -1237,6 +1226,81 @@ psicometricos_post = analitem[,1:6] %>%
 indicadores_psicometricos = rbind(indicadores_psicometricos, 
                                   psicometricos_post)
 ```
+
+Debido a que el ítem *Grupo 3 _ 1* tiene un comportamiento psicométrico indeseado, será eliminado de la calificación. Dicho ítem pertenece al componente afectivo.
+
+
+```{r}
+# Calificación
+
+# Total
+
+actitudes_matematicas_pre$Total_pre =
+  apply(actitudes_matematicas_pre[,c(7:18)[-7]], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+actitudes_matematicas_post$Total_post =
+  apply(actitudes_matematicas_post[,c(7:18)[-7]], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+# Afectivo
+
+actitudes_matematicas_pre$Afectivo_pre =
+  apply(actitudes_matematicas_pre[,c(7, 10, 16)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+
+actitudes_matematicas_post$Afectivo_post =
+  apply(actitudes_matematicas_post[,c(7, 10, 16)], 1, 
+        function(x) sum(x, na.rm= FALSE))
+```
+
+
+```{r}
+# Volvemos a obtener la matriz pre post
+
+pre_post = inner_join(actitudes_matematicas_post,
+                      dplyr::select(actitudes_matematicas_pre,
+                                    c("Código", 
+                                      "Total_pre", 
+                                      "Afectivo_pre",
+                                      "Cognitivo_pre", 
+                                      "Conativo_pre")),
+                      by = "Código")
+```
+
+
+```{r, warning=FALSE}
+pivot_to_bind = dplyr::select(pre_post, c("Código", "Total_pre",
+                                          "Afectivo_pre",
+                                          "Cognitivo_pre",
+                                          "Conativo_pre",
+                                          "Total_post",
+                                          "Afectivo_pre",
+                                          "Cognitivo_post",
+                                          "Conativo_post"))
+
+pivot_to_bind[,2:ncol(pivot_to_bind)] =
+  apply(pivot_to_bind[,2:ncol(pivot_to_bind)],
+        2, function(x) min_max_scale(x))
+
+pivot_to_bind = 
+  pivot_to_bind %>%
+  pivot_longer(cols = !`Código`,
+               names_to = c("Prueba", "Tipo"),
+               names_sep = "_",
+               values_to = "score")
+
+pivot_to_bind$Prueba = str_replace_all(pivot_to_bind$Prueba,
+                       c("Total" = "Actitudes hacia las matematicas - Total",
+                         "Afectivo" = "Actitudes hacia las matematicas - Afectivo",
+                         "Cognitivo" = "Actitudes hacia las matematicas - Cognitivo",
+                         "Conativo" = "Actitudes hacia las matematicas - Conativo"))
+
+
+pivot_final = rbind(pivot_final, pivot_to_bind)
+```
+
+
 
 #### Comparación pre-post
 
@@ -1316,7 +1380,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_matematicas.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_matematicas.png")
 ```
 
 ###### Tamaño del efecto
@@ -1426,7 +1490,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_matematicas_afectivo.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_matematicas_afectivo.png")
 ```
 
 ###### Tamaño del efecto
@@ -1536,7 +1600,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_matematicas_cognitivo.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_matematicas_cognitivo.png")
 ```
 
 ###### Tamaño del efecto
@@ -1646,7 +1710,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/actitudes_matematicas_conativo.png")
+ggsave("../Plots/segunda_aplicacion/actitudes_matematicas_conativo.png")
 ```
 
 
@@ -1692,17 +1756,19 @@ comparaciones = rbind(comparaciones, data_temp)
 ```{r, message=FALSE}
 # Motivación Pre
 motivacion_pre = read_sheet(url_pre, sheet = "Motivación")
-motivacion_pre = motivacion_pre[,1:18]
+motivacion_pre = motivacion_pre[,1:16]
 
 motivacion_pre = filter(motivacion_pre,
                        !is.na(`Código`),
                        !is.na(`1`))
 
-motivacion_pre[,7:18] = apply(motivacion_pre[,7:18], 2, 
+motivacion_pre[,7:16] = apply(motivacion_pre[,7:16], 2, 
                               function(x) str_to_upper(x))
 
-motivacion_pre[,7:18] = apply(motivacion_pre[,7:18], 2, 
-                              function(x) {ifelse(x == "A", 1, 0)})
+claves_motivacion_pre = c('B','A','A','B','B','B','B','B','A','A')
+
+motivacion_pre[,7:16] = calificacion(motivacion_pre[,7:16],
+                                      claves_motivacion_pre)
 
 # Motivación Post
 
@@ -1716,17 +1782,10 @@ motivacion_post = filter(motivacion_post,
 motivacion_post[,7:16] = apply(motivacion_post[,7:16], 2, 
                                function(x) str_to_upper(x))
 
-claves_motivacion_post = c("B", "A", "A", "B", "B", "B", "B", "B", "A", "A")
+claves_motivacion_post = c('B','B','A','B','A','A','B','B','A','A')
 
-calificacion = function(data, claves){
-  for(i in 1:dim(data)[2]){
-    data[,i] = apply(data[,i], 1, 
-                     function(x) {ifelse(x == claves[i], 1, 0)})
-  }
-  data
-}
-
-motivacion_post[,7:16] = calificacion(motivacion_post[,7:16], claves_motivacion_post)
+motivacion_post[,7:16] = calificacion(motivacion_post[,7:16],
+                                      claves_motivacion_post)
 ```
 
 ```{r, message=FALSE}
@@ -1734,7 +1793,7 @@ motivacion_post[,7:16] = calificacion(motivacion_post[,7:16], claves_motivacion_
 
 # General
 
-motivacion_pre$Total_pre = apply(motivacion_pre[,7:18], 1, 
+motivacion_pre$Total_pre = apply(motivacion_pre[,7:16], 1, 
                                    function(x) sum(x, na.rm= FALSE))
 
 motivacion_post$Total_post = apply(motivacion_post[,7:16], 1, 
@@ -1742,10 +1801,10 @@ motivacion_post$Total_post = apply(motivacion_post[,7:16], 1,
 
 # Interés
 
-motivacion_pre$Interes_pre = apply(motivacion_pre[,c(7,10,13,16)], 1, 
+motivacion_pre$Interes_pre = apply(motivacion_pre[,c(7,10,13)], 1, 
                                    function(x) sum(x, na.rm= FALSE))
 
-motivacion_post$Interes_post = apply(motivacion_post[,c(7,10,13)], 1, 
+motivacion_post$Interes_post = apply(motivacion_post[,c(8,11,14)], 1, 
                                      function(x) sum(x, na.rm= FALSE))
 
 
@@ -1753,42 +1812,52 @@ motivacion_post$Interes_post = apply(motivacion_post[,c(7,10,13)], 1,
 
 # Orientación al aprendizaje
 
-motivacion_pre$OrientacionAprendizaje_pre = apply(motivacion_pre[,c(8,11,14,17)], 1,
-                                                   function(x) sum(x, na.rm= FALSE))
+motivacion_pre$OrientacionAprendizaje_pre = 
+  apply(motivacion_pre[,c(8,11,15)], 1,
+        function(x) sum(x, na.rm= FALSE))
 
-motivacion_post$OrientacionAprendizaje_post = apply(motivacion_post[,c(8,11,15)], 1,
-                                                     function(x) sum(x, na.rm= FALSE))
+motivacion_post$OrientacionAprendizaje_post =
+  apply(motivacion_post[,c(9,12,15)], 1,
+        function(x) sum(x, na.rm= FALSE))
 
 # Orientación al resultado
 
-motivacion_pre$OrientacionResultado_pre = 4 - motivacion_pre$OrientacionAprendizaje_pre
-motivacion_post$OrientacionResultado_post = 3 - motivacion_post$OrientacionAprendizaje_post
+motivacion_pre$OrientacionResultado_pre = 
+  3 - motivacion_pre$OrientacionAprendizaje_pre
+
+motivacion_post$OrientacionResultado_post = 
+  3 - motivacion_post$OrientacionAprendizaje_post
 
 # Atribución interna
 
-motivacion_pre$AtribucionInterna_pre = apply(motivacion_pre[,c(15,18)], 1, 
-                                              function(x) sum(x, na.rm= FALSE))
+motivacion_pre$AtribucionInterna_pre = 
+  apply(motivacion_pre[,c(9,16)], 1, 
+        function(x) sum(x, na.rm= FALSE))
 
-motivacion_post$AtribucionInterna_post = apply(motivacion_post[,c(9,16)], 1, 
-                                                function(x) sum(x, na.rm= FALSE))
+motivacion_post$AtribucionInterna_post = 
+  apply(motivacion_post[,c(13,16)], 1, 
+        function(x) sum(x, na.rm= FALSE))
 
 # Atribución externa
 
-motivacion_pre$AtribucionExterna_pre = 2 - motivacion_pre$AtribucionInterna_pre
+motivacion_pre$AtribucionExterna_pre = 
+  2 - motivacion_pre$AtribucionInterna_pre
 
-motivacion_post$AtribucionExterna_post = 2 - motivacion_post$AtribucionInterna_post
+motivacion_post$AtribucionExterna_post = 
+  2 - motivacion_post$AtribucionInterna_post
 
 # Expectativa
 
-motivacion_pre$Expectativa_pre = apply(motivacion_pre[,c(9,12)], 1, 
+motivacion_pre$Expectativa_pre = apply(motivacion_pre[,c(12, 14)], 1, 
                                        function(x) sum(x, na.rm= FALSE))
 
-motivacion_post$Expectativa_post = apply(motivacion_post[,c(12,14)], 1, 
+motivacion_post$Expectativa_post = apply(motivacion_post[,c(7, 10)], 1, 
                                          function(x) sum(x, na.rm= FALSE))
 
 columnas_pre = c("Total_pre",
                  "Interes_pre",
                  "OrientacionResultado_pre",
+                 "OrientacionAprendizaje_pre",
                  "AtribucionInterna_pre",
                  "AtribucionExterna_pre",
                  "Expectativa_pre")
@@ -1808,7 +1877,8 @@ motivacion_post[,columnas_post] = apply(motivacion_post[,columnas_post],2,
                                         function(x) min_max_scale(x) )
 
 pre_post = inner_join(motivacion_post,
-                      dplyr::select(motivacion_pre, c("Código", columnas_pre)),
+                      dplyr::select(motivacion_pre, c("Código",
+                                                      columnas_pre)),
                       by = "Código")
 ```
 
@@ -1829,13 +1899,11 @@ pivot_to_bind =
                names_sep = "_",
                values_to = "score")
 
-unique(pivot_to_bind$Prueba)
-
 pivot_to_bind$Prueba = str_replace_all(pivot_to_bind$Prueba,
                        c("Total" = "Motivacion - Total",
                          "Interes" = "Motivacion - Interes",
-                         "OrientacionResultado" = "Motivacion - Metas",
-                         "AtribucionExterna" = "Motivacion - Atribucion externa",
+                         "OrientacionAprendizaje" = "Motivacion - Metas",
+                         "AtribucionInterna" = "Motivacion - Atribucion interna",
                          "Expectativa" = "Motivacion - Expectativas"))
 
 pivot_final = rbind(pivot_final, pivot_to_bind)
@@ -1847,13 +1915,13 @@ pivot_final = rbind(pivot_final, pivot_to_bind)
 #### Total pre
 
 ```{r}
-alpha(motivacion_pre[,7:18])
+alpha(motivacion_pre[,7:16])
 
-for(i in seq(length(colnames(motivacion_pre[,7:18])))){
-  x = alpha(motivacion_pre[,7:18][,-i])
+for(i in seq(length(colnames(motivacion_pre[,7:16])))){
+  x = alpha(motivacion_pre[,7:16][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_pre[,7:18])[i]))
+              colnames(motivacion_pre[,7:16])[i]))
 }
 ```
 
@@ -1867,6 +1935,34 @@ for(i in seq(length(colnames(motivacion_post[,7:16])))){
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
               colnames(motivacion_post[,7:16])[i]))
+}
+```
+
+Como podemos observar los valores en el alpha son bastante bajo y se debe al ruido que están generando algunos ítems, sobre todo los relacionados con interés y atribución. Una combinación que satisface los indicadores es
+
+#### Total pre
+
+```{r}
+alpha(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]])
+
+for(i in seq(length(colnames(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]])))){
+  x = alpha(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]])[i]))
+}
+```
+
+#### Total post
+
+```{r}
+alpha(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]])
+
+for(i in seq(length(colnames(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]])))){
+  x = alpha(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]][,-i])
+  print(paste("El índice de confiabilidad cambia a", x, 
+              "al eliminar el ítem", 
+              colnames(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]])[i]))
 }
 ```
 
@@ -1886,81 +1982,78 @@ alfa = rbind(alfa,
 #### Interés pre
 
 ```{r}
-alpha(motivacion_pre[,c("1","4","7","10")])
+alpha(motivacion_pre[,c(7,10,13)])
 
-for(i in seq(length(colnames(motivacion_pre[,c("1","4","7","10")])))){
-  x = alpha(motivacion_pre[,c("1","4","7","10")][,-i])
+for(i in seq(length(colnames(motivacion_pre[,c(7,10,13)])))){
+  x = alpha(motivacion_pre[,c(7,10,13)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_pre[,c("1","4","7","10")])[i]))
+              colnames(motivacion_pre[,c(7,10,13)])[i]))
 }
 ```
 
 #### Interés post
 
 ```{r}
-alpha(motivacion_post[,c(7,10,13)])
+alpha(motivacion_post[,c(8,11,14)])
 
-for(i in seq(length(colnames(motivacion_post[,c(7,10,13)])))){
-  x = alpha(motivacion_post[,c(7,10,13)][,-i])
+for(i in seq(length(colnames(motivacion_post[,c(8,11,14)])))){
+  x = alpha(motivacion_post[,c(8,11,14)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_post[,c(7,10,13)])[i]))
+              colnames(motivacion_post[,c(8,11,14)])[i]))
 }
 ```
 
 #### Metas pre
 
 ```{r}
-alpha(motivacion_pre[,c("2","5","8","11")])
+alpha(motivacion_pre[,c(8,11,15)])
 
-for(i in seq(length(colnames(motivacion_pre[,c("2","5","8","11")])))){
-  x = alpha(motivacion_pre[,c("2","5","8","11")][,-i])
+for(i in seq(length(colnames(motivacion_pre[,c(8,11,15)])))){
+  x = alpha(motivacion_pre[,c(8,11,15)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_pre[,c("2","5","8","11")])[i]))
+              colnames(motivacion_pre[,c(8,11,15)])[i]))
 }
 ```
 
 #### Metas post
 
 ```{r}
-alpha(motivacion_post[,c(8,11,15)])
+alpha(motivacion_post[,c(9,12,15)])
 
-for(i in seq(length(colnames(motivacion_post[,c(8,11,15)])))){
-  x = alpha(motivacion_post[,c(8,11,15)][,-i])
+for(i in seq(length(colnames(motivacion_post[,c(9,12,15)])))){
+  x = alpha(motivacion_post[,c(9,12,15)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_post[,c(8,11,15)])[i]))
+              colnames(motivacion_post[,c(9,12,15)])[i]))
 }
 ```
 
-#### Expectativas
-
-Este sólo está en el pre, ya que en el post la escala se subdividió
+#### Atribución interna pre
 
 ```{r}
-alpha(motivacion_pre[,c("3","6","9","12")])
-
-for(i in seq(length(colnames(motivacion_pre[,c("3","6","9","12")])))){
-  x = alpha(motivacion_pre[,c("3","6","9","12")][,-i])
-  print(paste("El índice de confiabilidad cambia a", x, 
-              "al eliminar el ítem", 
-              colnames(motivacion_pre[,c("3","6","9","12")])[i]))
-}
+alpha(motivacion_pre[,c(9,16)])
 ```
 
-#### Atribución interna
+#### Atribución interna pre
 
 ```{r}
-alpha(motivacion_post[,c(9,16)])
+alpha(motivacion_post[,c(13,16)])
 ```
 No puede obtener el indicador al eliminar un ítem, ya que si queda un único ítem el indicador no tiene solución.
 
-#### Expectativa positiva
+#### Expectativa positiva pre
 
 ```{r}
-alpha(motivacion_post[,c(12,14)])
+alpha(motivacion_pre[,c(12,14)])
+```
+
+#### Expectativa positiva pre
+
+```{r}
+alpha(motivacion_post[,c(7,10)])
 ```
 
 ### Indicadores psicométricos
@@ -1968,7 +2061,7 @@ alpha(motivacion_post[,c(12,14)])
 #### Total pre
 
 ```{r}
-analitem = item.exam(motivacion_pre[,7:18], discrim=T)
+analitem = item.exam(motivacion_pre[,7:16], discrim=T)
 analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
 cols_num = colnames(analitem[,1:6])
 analitem$Item = row.names(analitem)
@@ -2112,7 +2205,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/motivacion.png")
+ggsave("../Plots/segunda_aplicacion/motivacion.png")
 ```
 
 ##### Tamaño del efecto
@@ -2218,7 +2311,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/motivacion_interes.png")
+ggsave("../Plots/segunda_aplicacion/motivacion_interes.png")
 ```
 
 ##### Tamaño del efecto
@@ -2258,17 +2351,19 @@ comparaciones = rbind(comparaciones, data_temp)
 
 #### Metas
 
+Orientación al aprendizaje
+
 ##### Estadísticos de normalidad
 
 ```{r}
 print("Estadístico de normalidad pre")
 
-lillie.test(pre_post$OrientacionResultado_pre)
+lillie.test(pre_post$OrientacionAprendizaje_pre)
 
 
 print("Estadístico de normalidad post")
 
-lillie.test(pre_post$OrientacionResultado_post)
+lillie.test(pre_post$OrientacionAprendizaje_post)
 ```
 
 Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
@@ -2276,11 +2371,11 @@ Debido a que no existe normalidad en las puntuaciones, se usará una prueba no p
 ##### Descriptivos
 
 ```{r}
-summ = data.frame(unclass(psych::describe(pre_post[,c("OrientacionResultado_pre",
-                                                      "OrientacionResultado_post")])), 
+summ = data.frame(unclass(psych::describe(pre_post[,c("OrientacionAprendizaje_pre",
+                                                      "OrientacionAprendizaje_post")])), 
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
-summ$vars = c("OrientacionResultado_pre", "OrientacionResultado_post")
+summ$vars = c("OrientacionAprendizaje_pre", "OrientacionAprendizaje_post")
 
 summ[,1:10] %>%
   gt()
@@ -2291,8 +2386,8 @@ summ[,1:10] %>%
 ```{r}
 comparacion = 
   wilcox.test(
-    x           = pre_post$OrientacionResultado_pre,
-    y           = pre_post$OrientacionResultado_post,
+    x           = pre_post$OrientacionAprendizaje_pre,
+    y           = pre_post$OrientacionAprendizaje_post,
     alternative = "two.sided",
     mu          = 0,
     var.equal   = TRUE,
@@ -2305,8 +2400,8 @@ comparacion
 
 ```{r}
 pre_post %>%
-  dplyr::select(OrientacionResultado_pre, OrientacionResultado_post) %>%
-  pivot_longer(cols = c(OrientacionResultado_pre, OrientacionResultado_post), 
+  dplyr::select(OrientacionAprendizaje_pre, OrientacionAprendizaje_post) %>%
+  pivot_longer(cols = c(OrientacionAprendizaje_pre, OrientacionAprendizaje_post), 
                values_to = "value", 
                names_to = "Aplicación") %>%
   ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
@@ -2322,15 +2417,15 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/motivacion_metas_resultado.png")
+ggsave("../Plots/segunda_aplicacion/motivacion_metas_aprendizaje.png")
 ```
 
 ##### Tamaño del efecto
 
 ```{r}
 size_effect = 
-  cohen.d(pre_post$OrientacionResultado_post, 
-          pre_post$OrientacionResultado_pre, paired = TRUE)
+  cohen.d(pre_post$OrientacionAprendizaje_post, 
+          pre_post$OrientacionAprendizaje_pre, paired = TRUE)
 
 size_effect
 ```
@@ -2361,25 +2456,19 @@ comparaciones = rbind(comparaciones, data_temp)
 
 ```
 
-#### Atribución externa
-
-```{r}
-pre_post$AtribucionExterna_pre = 1 - pre_post$AtribucionInterna_pre
-pre_post$AtribucionExterna_post = 1 - pre_post$AtribucionInterna_post
-```
-
+#### Atribución interna
 
 ##### Estadísticos de normalidad
 
 ```{r}
 print("Estadístico de normalidad pre")
 
-lillie.test(pre_post$AtribucionExterna_pre)
+lillie.test(pre_post$AtribucionInterna_pre)
 
 
 print("Estadístico de normalidad post")
 
-lillie.test(pre_post$AtribucionExterna_post)
+lillie.test(pre_post$AtribucionInterna_post)
 ```
 
 Debido a que no existe normalidad en las puntuaciones, se usará una prueba no paramétrica
@@ -2387,11 +2476,11 @@ Debido a que no existe normalidad en las puntuaciones, se usará una prueba no p
 ##### Descriptivos
 
 ```{r}
-summ = data.frame(unclass(psych::describe(pre_post[,c("AtribucionExterna_pre",
-                                                      "AtribucionExterna_post")])), 
+summ = data.frame(unclass(psych::describe(pre_post[,c("AtribucionInterna_pre",
+                                                      "AtribucionInterna_post")])), 
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
-summ$vars = c("AtribucionExterna_pre", "AtribucionExterna_post")
+summ$vars = c("AtribucionInterna_pre", "AtribucionInterna_post")
 
 summ[,1:10] %>%
   gt()
@@ -2402,8 +2491,8 @@ summ[,1:10] %>%
 ```{r}
 comparacion = 
   wilcox.test(
-    x           = pre_post$AtribucionExterna_pre,
-    y           = pre_post$AtribucionExterna_post,
+    x           = pre_post$AtribucionInterna_pre,
+    y           = pre_post$AtribucionInterna_post,
     alternative = "two.sided",
     mu          = 0,
     var.equal   = TRUE,
@@ -2416,8 +2505,8 @@ comparacion
 
 ```{r}
 pre_post %>%
-  dplyr::select(AtribucionExterna_pre, AtribucionExterna_post) %>%
-  pivot_longer(cols = c(AtribucionExterna_pre, AtribucionExterna_post), 
+  dplyr::select(AtribucionInterna_pre, AtribucionInterna_post) %>%
+  pivot_longer(cols = c(AtribucionInterna_pre, AtribucionInterna_post), 
                values_to = "value", 
                names_to = "Aplicación") %>%
   ggplot(aes(x = reorder(`Aplicación`, desc(`Aplicación`)), y = value)) +
@@ -2433,15 +2522,15 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/motivacion_AtribucionExterna.png")
+ggsave("../Plots/segunda_aplicacion/motivacion_AtribucionInterna.png")
 ```
 
 ##### Tamaño del efecto
 
 ```{r}
 size_effect = 
-  cohen.d(pre_post$AtribucionExterna_post, 
-          pre_post$AtribucionExterna_pre, paired = TRUE)
+  cohen.d(pre_post$AtribucionInterna_post, 
+          pre_post$AtribucionInterna_pre, paired = TRUE)
 
 size_effect
 ```
@@ -2451,7 +2540,7 @@ size_effect
 # Separamos los descriptivos importantes
 desc = summ[,1:10] %>%
         dplyr::select(c("n", "mean", "sd", "min", "max")) %>%
-          mutate(Prueba = "Motivación - Atribución externa") %>%
+          mutate(Prueba = "Motivación - Atribución interna") %>%
           mutate(Area = "Motivación") %>%
           mutate(`Aplicación` = c("Pre", "Post"))
 
@@ -2462,7 +2551,7 @@ descriptivos = rbind(descriptivos, desc)
 # Guardamos los resultados de esta comparación
 
 data_temp = 
-  data.frame(Prueba = "Motivación - Atribución externa",
+  data.frame(Prueba = "Motivación - Atribución interna",
              `Media pre` = summ$mean[1],
              `Media post` = summ$mean[2],
              `p value` = comparacion$p.value,
@@ -2538,7 +2627,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/motivacion_expectativas.png")
+ggsave("../Plots/segunda_aplicacion/motivacion_expectativas.png")
 ```
 
 ##### Tamaño del efecto
@@ -2588,13 +2677,14 @@ Para funciones ejecutivas no se calcula un puntaje global, ya que cada test apun
 # Pre
 
 mem_audi_pre = read_sheet(url_pre, sheet = "Memoria Audi")
-vector = c(colnames(mem_audi_pre)[1:6], as.vector(unlist(mem_audi_pre[1,][7:34])))
+vector = c(colnames(mem_audi_pre)[1:6], as.vector(unlist(mem_audi_pre[1,][7:30])))
 colnames(mem_audi_pre) = vector
 mem_audi_pre = mem_audi_pre[-1,1:length(vector)]
 mem_audi_pre = filter(mem_audi_pre, 
                        !is.na(`Código`), 
-                       !is.na(Vaca),
-                       Vaca != 'NULL')
+                       !is.na(Caballo),
+                       Caballo != 'NULL')
+
 item_1_pre = c("Caballo","Perro","Aguila","Pollito",
                "Foca","Vaca","Cocodrilo","Sapo")
 
@@ -2602,28 +2692,32 @@ item_2_pre = c("Oveja","Elefante","Tiburon" ,"Caracol",
                "Ratón" ,"Gato","Tortuga","Pez")
 
 incorrectos_1_pre = c("León",	"Oso", "Ballena",	"Lagarto")
-incorrectos_2_pre = c("Mariposa", "Mono",	"Jirafa",	"Pantera")
+incorrectos_2_pre = c("Mariposa", "Mono",	"Jirafa",	"Araña")
 
-mem_audi_pre[,7:34] = apply(mem_audi_pre[,7:34], 2,
+mem_audi_pre[,7:30] = apply(mem_audi_pre[,7:30], 2,
                       function(x) str_replace_all(x,'NULL', '0'))
 
-mem_audi_pre$`Aciertos item 1_pre` = apply(apply(mem_audi_pre[,item_1_pre], 2,
-                                                 function(x) as.numeric(x)),
-                                           1, function(x) sum(x, na.rm= FALSE))
+mem_audi_pre$`Aciertos item 1_pre` = 
+  apply(apply(mem_audi_pre[,item_1_pre], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_audi_pre$`Errores item 1_pre` = apply(apply(mem_audi_pre[,incorrectos_1_pre],
-                                                2, function(x) as.numeric(x)),
-                                          1, function(x) sum(x, na.rm= FALSE))
+mem_audi_pre$`Errores item 1_pre` =
+  apply(apply(mem_audi_pre[,incorrectos_1_pre],
+              2, function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
 
 
-mem_audi_pre$`Aciertos item 2_pre` = apply(apply(mem_audi_pre[,item_2_pre], 2,
-                                                 function(x) as.numeric(x)),
-                                           1, function(x) sum(x, na.rm= FALSE))
+mem_audi_pre$`Aciertos item 2_pre` = 
+  apply(apply(mem_audi_pre[,item_2_pre], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_audi_pre$`Errores item 2_pre` = apply(apply(mem_audi_pre[,incorrectos_2_pre],
-                                                2, function(x) as.numeric(x)),
-                                          1, function(x) sum(x, na.rm= FALSE))
+mem_audi_pre$`Errores item 2_pre` =
+  apply(apply(mem_audi_pre[,incorrectos_2_pre],
+              2, function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
 mem_audi_pre$`Puntaje item 1_pre` = 
   mem_audi_pre$`Aciertos item 1_pre` - mem_audi_pre$`Errores item 1_pre`
@@ -2632,51 +2726,58 @@ mem_audi_pre$`Puntaje item 2_pre` =
   mem_audi_pre$`Aciertos item 2_pre` - mem_audi_pre$`Errores item 2_pre`
 
 
-mem_audi_pre$`Puntaje item 1_pre` = apply(mem_audi_pre[,"Puntaje item 1_pre"], 1,
-                                          function(x) change_to_zero(x))
+mem_audi_pre$`Puntaje item 1_pre` = 
+  apply(mem_audi_pre[,"Puntaje item 1_pre"], 1,
+        function(x) change_to_zero(x))
 
-mem_audi_pre$`Puntaje item 2_pre` = apply(mem_audi_pre[,"Puntaje item 2_pre"], 1,
-                                          function(x) change_to_zero(x))
+mem_audi_pre$`Puntaje item 2_pre` = 
+  apply(mem_audi_pre[,"Puntaje item 2_pre"], 1,
+        function(x) change_to_zero(x))
 
 # Post
 
 mem_audi_post = read_sheet(url_post, sheet = "Memoria Audi")
-vector = c(colnames(mem_audi_post)[1:6], as.vector(unlist(mem_audi_post[1,][7:34])))
+vector = c(colnames(mem_audi_post)[1:6], as.vector(unlist(mem_audi_post[1,][7:30])))
 colnames(mem_audi_post) = vector
 mem_audi_post = mem_audi_post[-1,1:length(vector)]
 mem_audi_post = filter(mem_audi_post, 
                        !is.na(`Código`), 
-                       !is.na(Burro),
-                       Burro != 'NULL')
+                       !is.na(Caballo),
+                       Caballo != 'NULL')
 
 item_1_post = c("Caballo","Gallina", "Conejo", 
-                "Leopardo", "Ardilla", "Cerdo", "Cangrejo", "Burro")
+                "Leopardo", "Serpiente", "Cerdo", "Cangrejo", "Leon")
 
-item_2_post = c("Estrella", "Gato", "Abeja", 
-                "Cebra", "Rana", "Armadillo", "Tortuga", "Iguana")
+item_2_post = c("Ballena", "Gato", "Abeja", 
+                "Cebra", "Rana", "Cocodrilo", "Tortuga", "Iguana")
 
-incorrectos_1_post = c("Perro",	"Cabra", "Avestruz",	"Hormiga")
-incorrectos_2_post = c("Toro", "Delfín",	"Loro",	"Camello")
+incorrectos_1_post = c("Cabra", "Avestruz",	"Hormiga", "Perro")
+incorrectos_2_post = c("Toro", "Pulpo",	"Loro",	"Camello")
 
-mem_audi_post[,7:34] = apply(mem_audi_post[,7:34], 2,
-                      function(x) str_replace_all(x,'NULL', '0'))
+mem_audi_post[,7:30] = apply(mem_audi_post[,7:30], 2,
+                      function(x) str_replace_all(x,c('NULL' =  '0',
+                                                      'O' = '0')))
 
-mem_audi_post$`Aciertos item 1_post` = apply(apply(mem_audi_post[,item_1_post], 2,
-                                                   function(x) as.numeric(x)),
-                                             1, function(x) sum(x, na.rm= FALSE))
+mem_audi_post$`Aciertos item 1_post` =
+  apply(apply(mem_audi_post[,item_1_post], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_audi_post$`Errores item 1_post` = apply(apply(mem_audi_post[,incorrectos_1_post], 
-                                                  2, function(x) as.numeric(x)),
-                                            1, function(x) sum(x, na.rm= FALSE))
+mem_audi_post$`Errores item 1_post` =
+  apply(apply(mem_audi_post[,incorrectos_1_post], 
+              2, function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
 
-mem_audi_post$`Aciertos item 2_post` = apply(apply(mem_audi_post[,item_2_post], 2,
-                                                   function(x) as.numeric(x)),
-                                             1, function(x) sum(x, na.rm= FALSE))
+mem_audi_post$`Aciertos item 2_post` =
+  apply(apply(mem_audi_post[,item_2_post], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_audi_post$`Errores item 2_post` = apply(apply(mem_audi_post[,incorrectos_2_post], 
-                                                  2, function(x) as.numeric(x)),
-                                            1, function(x) sum(x, na.rm= FALSE))
+mem_audi_post$`Errores item 2_post` =
+  apply(apply(mem_audi_post[,incorrectos_2_post], 
+              2, function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
 mem_audi_post$`Puntaje item 1_post` = 
   mem_audi_post$`Aciertos item 1_post` - mem_audi_post$`Errores item 1_post`
@@ -2685,11 +2786,13 @@ mem_audi_post$`Puntaje item 2_post` =
   mem_audi_post$`Aciertos item 2_post` - mem_audi_post$`Errores item 2_post`
 
 
-mem_audi_post$`Puntaje item 1_post` = apply(mem_audi_post[,"Puntaje item 1_post"],
-                                            1, function(x) change_to_zero(x))
+mem_audi_post$`Puntaje item 1_post` = 
+  apply(mem_audi_post[,"Puntaje item 1_post"],
+        1, function(x) change_to_zero(x))
 
-mem_audi_post$`Puntaje item 2_post` = apply(mem_audi_post[,"Puntaje item 2_post"],
-                                            1, function(x) change_to_zero(x))
+mem_audi_post$`Puntaje item 2_post` = 
+  apply(mem_audi_post[,"Puntaje item 2_post"],
+        1, function(x) change_to_zero(x))
 ```
 
 #### Alpha
@@ -3038,7 +3141,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/memoria_auditiva.png")
+ggsave("../Plots/segunda_aplicacion/memoria_auditiva.png")
 ```
 
 
@@ -3083,38 +3186,42 @@ comparaciones = rbind(comparaciones, data_temp)
 # Pre
 
 mem_vis_pre = read_sheet(url_pre, sheet = "Memoria Vis")
-vector = c(colnames(mem_vis_pre)[1:6], as.vector(unlist(mem_vis_pre[1,][7:22])))
+vector = c(colnames(mem_vis_pre)[1:6], as.vector(unlist(mem_vis_pre[1,][7:18])))
 colnames(mem_vis_pre) = vector
 mem_vis_pre = mem_vis_pre[-1,1:length(vector)]
 mem_vis_pre = filter(mem_vis_pre,
                        !is.na(`Código`),
-                       !is.na(Gym),
-                       Gym != 'NULL')
+                       !is.na(GYM),
+                       GYM != 'NULL')
 
-mem_vis_pre[,7:22] = apply(mem_vis_pre[,7:22], 2,
+mem_vis_pre[,7:18] = apply(mem_vis_pre[,7:18], 2,
                       function(x) str_replace_all(x,'NULL', '0'))
 
-item_1_pre = c("Gym","Museo","Cajas")
-item_2_pre = c("Salón","Aeropuerto","Iglesia")
+item_1_pre = c("OFICINA","LAVANDERIA","CINE")
+item_2_pre = c("BARCO","JUGUETES","ELECTRONICOS")
 
-incorrectos_1_pre = c("Cine",	"Lavadoras",	"Oficina")
-incorrectos_2_pre = c("Sala",		"Paradero",	"Café")
+incorrectos_1_pre = c("GYM",	"TALLER",	"TIENDA")
+incorrectos_2_pre = c("SALON BELLEZA", "AEROPUERTO", "IGLESIA")
 
-mem_vis_pre$`Aciertos item 1_pre` = apply(apply(mem_vis_pre[,item_1_pre], 2,
-                                                function(x) as.numeric(x)),
-                                          1, function(x) sum(x, na.rm= FALSE))
+mem_vis_pre$`Aciertos item 1_pre` = 
+  apply(apply(mem_vis_pre[,item_1_pre], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_vis_pre$`Errores item 1_pre` = apply(apply(mem_vis_pre[,incorrectos_1_pre], 2,
-                                               function(x) as.numeric(x)),
-                                         1, function(x) sum(x, na.rm= FALSE))
+mem_vis_pre$`Errores item 1_pre` =
+  apply(apply(mem_vis_pre[,incorrectos_1_pre], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_vis_pre$`Aciertos item 2_pre` = apply(apply(mem_vis_pre[,item_2_pre], 2,
-                                                function(x) as.numeric(x)),
-                                          1, function(x) sum(x, na.rm= FALSE))
+mem_vis_pre$`Aciertos item 2_pre` = 
+  apply(apply(mem_vis_pre[,item_2_pre], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_vis_pre$`Errores item 2_pre` = apply(apply(mem_vis_pre[,incorrectos_2_pre], 2,
-                                               function(x) as.numeric(x)),
-                                         1, function(x) sum(x, na.rm= FALSE))
+mem_vis_pre$`Errores item 2_pre` =
+  apply(apply(mem_vis_pre[,incorrectos_2_pre], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
 mem_vis_pre$`Puntaje item 1_pre` = 
   mem_vis_pre$`Aciertos item 1_pre` - mem_vis_pre$`Errores item 1_pre`
@@ -3122,48 +3229,54 @@ mem_vis_pre$`Puntaje item 1_pre` =
 mem_vis_pre$`Puntaje item 2_pre` = 
   mem_vis_pre$`Aciertos item 2_pre` - mem_vis_pre$`Errores item 2_pre`
 
-mem_vis_pre$`Puntaje item 1_pre` = apply(mem_vis_pre[,"Puntaje item 1_pre"], 1,
-                                         function(x) change_to_zero(x))
+mem_vis_pre$`Puntaje item 1_pre` = 
+  apply(mem_vis_pre[,"Puntaje item 1_pre"], 1,
+        function(x) change_to_zero(x))
 
-mem_vis_pre$`Puntaje item 2_pre` = apply(mem_vis_pre[,"Puntaje item 2_pre"], 1,
-                                         function(x) change_to_zero(x))
+mem_vis_pre$`Puntaje item 2_pre` = 
+  apply(mem_vis_pre[,"Puntaje item 2_pre"], 1,
+        function(x) change_to_zero(x))
 
 ## Post
 
 mem_vis_post = read_sheet(url_post, sheet = "Memoria Vis")
-vector = c(colnames(mem_vis_post)[1:6], as.vector(unlist(mem_vis_post[1,][7:22])))
+vector = c(colnames(mem_vis_post)[1:6], as.vector(unlist(mem_vis_post[1,][7:18])))
 colnames(mem_vis_post) = vector
 
 mem_vis_post = mem_vis_post[-1,1:length(vector)]
 mem_vis_post = filter(mem_vis_post,
                        !is.na(`Código`),
                        # !is.null(Cancha),
-                       Iglesia != 'NULL')
+                       Campo != 'NULL')
 
-mem_vis_post[,7:22] = apply(mem_vis_post[,7:22], 2,
+mem_vis_post[,7:18] = apply(mem_vis_post[,7:18], 2,
                       function(x) str_replace_all(x,'NULL', '0'))
 
-item_1_post = c("Iglesia",	"GYM",	"Zoo")
-item_2_post = c("Vet",		"Playa",	"Fruteria")
+item_1_post = c("Campo",	"Colegio_",	"Noira")
+item_2_post = c("Heladeria",		"Parque",	"Aeropuerto")
 
-incorrectos_1_post = c("Cancha","Colegio_","Par. Diversiones")
-incorrectos_2_post = c("Aeropuerto","Helado","Parque")
+incorrectos_1_post = c("Iglesia","GYM","Zoo")
+incorrectos_2_post = c("Bus stop","Playa","Frutas")
 
-mem_vis_post$`Aciertos item 1_post` = apply(apply(mem_vis_post[,item_1_post], 2,
-                                                  function(x) as.numeric(x)),
-                                            1, function(x) sum(x, na.rm= FALSE))
+mem_vis_post$`Aciertos item 1_post` = 
+  apply(apply(mem_vis_post[,item_1_post], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_vis_post$`Errores item 1_post` = apply(apply(mem_vis_post[,incorrectos_1_post],
-                                                 2, function(x) as.numeric(x)),
-                                           1, function(x) sum(x, na.rm= FALSE))
+mem_vis_post$`Errores item 1_post` =
+  apply(apply(mem_vis_post[,incorrectos_1_post],
+              2, function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_vis_post$`Aciertos item 2_post` = apply(apply(mem_vis_post[,item_2_post], 2,
-                                                  function(x) as.numeric(x)),
-                                            1, function(x) sum(x, na.rm= FALSE))
+mem_vis_post$`Aciertos item 2_post` = 
+  apply(apply(mem_vis_post[,item_2_post], 2,
+              function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
-mem_vis_post$`Errores item 2_post` = apply(apply(mem_vis_post[,incorrectos_2_post],
-                                                 2, function(x) as.numeric(x)),
-                                           1, function(x) sum(x, na.rm= FALSE))
+mem_vis_post$`Errores item 2_post` =
+  apply(apply(mem_vis_post[,incorrectos_2_post],
+              2, function(x) as.numeric(x)),
+        1, function(x) sum(x, na.rm= FALSE))
 
 mem_vis_post$`Puntaje item 1_post` = 
   mem_vis_post$`Aciertos item 1_post` - mem_vis_post$`Errores item 1_post`
@@ -3171,11 +3284,13 @@ mem_vis_post$`Puntaje item 1_post` =
 mem_vis_post$`Puntaje item 2_post` = 
   mem_vis_post$`Aciertos item 2_post` - mem_vis_post$`Errores item 2_post`
 
-mem_vis_post$`Puntaje item 1_post` = apply(mem_vis_post[,"Puntaje item 1_post"], 1,
-                                           function(x) change_to_zero(x))
+mem_vis_post$`Puntaje item 1_post` = 
+  apply(mem_vis_post[,"Puntaje item 1_post"], 1,
+        function(x) change_to_zero(x))
 
-mem_vis_post$`Puntaje item 2_post` = apply(mem_vis_post[,"Puntaje item 2_post"], 1,
-                                           function(x) change_to_zero(x))
+mem_vis_post$`Puntaje item 2_post` = 
+  apply(mem_vis_post[,"Puntaje item 2_post"], 1,
+        function(x) change_to_zero(x))
 ```
 
 #### Alpha
@@ -3187,7 +3302,8 @@ Estas preguntas tienen una división importante ya que, cada ítem es en realida
 ###### Item 1
 
 ```{r}
-data_item_1_pre = apply(mem_vis_pre[,item_1_pre], 2, function(x) as.numeric(x))
+data_item_1_pre = apply(mem_vis_pre[,item_1_pre], 2, 
+                        function(x) as.numeric(x))
 ```
 
 ```{r}
@@ -3223,7 +3339,8 @@ for(i in seq(length(colnames(data_item_2_pre)))){
 ###### Item 1
 
 ```{r}
-data_item_1_post = apply(mem_vis_post[,item_1_post], 2, function(x) as.numeric(x))
+data_item_1_post = apply(mem_vis_post[,item_1_post], 2, 
+                         function(x) as.numeric(x))
 ```
 
 ```{r}
@@ -3240,7 +3357,8 @@ for(i in seq(length(colnames(data_item_1_post)))){
 ###### Item 2
 
 ```{r}
-data_item_2_post = apply(mem_vis_post[,item_2_post], 2, function(x) as.numeric(x))
+data_item_2_post = apply(mem_vis_post[,item_2_post], 2, 
+                         function(x) as.numeric(x))
 ```
 
 ```{r}
@@ -3478,7 +3596,8 @@ lillie.test(pre_post$Total_post)
 ##### Descriptivos
 
 ```{r}
-summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre",
+                                                      "Total_post")])),
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
 summ$vars = c("Total_pre", "Total_post")
@@ -3523,7 +3642,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/memoria_visual.png")
+ggsave("../Plots/segunda_aplicacion/memoria_visual.png")
 ```
 
 ##### Tamaño del efecto
@@ -3568,13 +3687,13 @@ comparaciones = rbind(comparaciones, data_temp)
 
 inhibicion_pre = read_sheet(url_pre, sheet = "Inhibiciòn")
 
-col_items = paste(rep("Item", 26), rep(1:2, each = 13), 
-                  rep(paste("_", rep(1:13, 2))))
+col_items = paste(rep("Item", 20), rep(1:2, each = 10), 
+                  rep(paste("_", rep(1:10, 2))))
 
 vector = c(colnames(inhibicion_pre)[1:6], col_items)
 colnames(inhibicion_pre) = vector
 
-inhibicion_pre = inhibicion_pre[,1:32]
+inhibicion_pre = inhibicion_pre[,1:26]
 
 inhibicion_pre = filter(inhibicion_pre,
                        !is.na(`Código`),
@@ -3583,24 +3702,23 @@ inhibicion_pre = filter(inhibicion_pre,
 inhibicion_pre[,col_items] = apply(inhibicion_pre[,col_items], 2, 
                                    function(x) str_to_upper(x))
 
-claves_inhibicion_pre = c('N', 'M',	'M',	'N',	'N',	'M',	'N',	
-                          'M',	'N',	'M',	'M',	'N',	'M',	'N',	
-                          'M',	'N',	'M',	'N',	'M',	'M',	'M',	'N',	
-                          'M',	'N',	'N',	'M')
+claves_inhibicion_pre = c('N','M','M','N','M','N','M',
+                          'N','M','N','N','M','N','M','N',
+                          'M','M','N','M','N')
 
 
-inhibicion_pre[,7:32] = calificacion(inhibicion_pre[,7:32], claves_inhibicion_pre)
+inhibicion_pre[,7:26] = calificacion(inhibicion_pre[,7:26], claves_inhibicion_pre)
 
-inhibicion_pre$`Aciertos item 1_pre` =  apply(inhibicion_pre[,7:19], 1, 
+inhibicion_pre$`Aciertos item 1_pre` =  apply(inhibicion_pre[,7:16], 1, 
                                               function(x) sum(x, na.rm= FALSE))
 
-inhibicion_pre$`Aciertos item 2_pre` =  apply(inhibicion_pre[,20:32], 1, 
+inhibicion_pre$`Aciertos item 2_pre` =  apply(inhibicion_pre[,17:26], 1, 
                                               function(x) sum(x, na.rm= FALSE))
 
 
 # Post
 
-inhibicion_post = read_sheet(url_post, sheet = "Inhibición")
+inhibicion_post = read_sheet(url_post, sheet = "Inhibiciòn")
 
 col_items = paste(rep("Item", 20), rep(1:2, each = 10), 
                   rep(paste("_", rep(1:10, 2))))
@@ -3617,8 +3735,8 @@ inhibicion_post = filter(inhibicion_post,
 inhibicion_post[,col_items] = apply(inhibicion_post[,col_items], 2, 
                                     function(x) str_to_upper(x))
 
-claves_inhibicion_post = c('E',	'S', 'S',	'E', 'S', 'E', 'E',	'S', 'E',	'S', 
-                           'S',	'S', 'E',	'S', 'E',	'S', 'E',	'S',	'E', 'E')
+claves_inhibicion_post = c('E','S','S','E','S','E','E','S','E','S',
+                           'S','S','E','S','E','S','E','S','E','E')
 
 
 inhibicion_post[,7:26] = calificacion(inhibicion_post[,7:26], claves_inhibicion_post)
@@ -3635,7 +3753,8 @@ inhibicion_post$`Aciertos item 2_post` =  apply(inhibicion_post[,17:26], 1,
 ##### Pre
 
 ```{r}
-data_item_2_pre = apply(inhibicion_pre[,20:32], 2, function(x) as.numeric(x))
+data_item_2_pre = apply(inhibicion_pre[,17:26], 2, 
+                        function(x) as.numeric(x))
 ```
 
 ```{r}
@@ -3652,7 +3771,8 @@ for(i in seq(length(colnames(data_item_2_pre)))){
 ##### Post
 
 ```{r}
-data_item_2_post = apply(inhibicion_post[,17:26], 2, function(x) as.numeric(x))
+data_item_2_post = apply(inhibicion_post[,17:26], 2, 
+                         function(x) as.numeric(x))
 ```
 
 ```{r}
@@ -3760,7 +3880,8 @@ inhibicion_pre$Total_pre = min_max_scale(inhibicion_pre$`Aciertos item 2_pre`)
 inhibicion_post$Total_post = min_max_scale(inhibicion_post$`Aciertos item 2_post`)
 
 pre_post = inner_join(inhibicion_post, 
-                      dplyr::select(inhibicion_pre, c("Código", "Total_pre")),
+                      dplyr::select(inhibicion_pre, c("Código", 
+                                                      "Total_pre")),
                       by = "Código")
 ```
 
@@ -3803,7 +3924,8 @@ lillie.test(pre_post$Total_post)
 ##### Descriptivos
 
 ```{r}
-summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre",
+                                                      "Total_post")])),
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
 summ$vars = c("Total_pre", "Total_post")
@@ -3848,7 +3970,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/inhibicion.png")
+ggsave("../Plots/segunda_aplicacion/inhibicion.png")
 ```
 
 ##### Tamaño del efecto
@@ -3893,35 +4015,38 @@ comparaciones = rbind(comparaciones, data_temp)
 
 flexibilidad_pre = read_sheet(url_pre, sheet = "Flexibilidad")
 
-col_items = paste(rep("Item", 26), rep(1:2, each = 13), 
-                  rep(paste("_", rep(1:13, 2))))
+col_items = paste(rep("Item", 20), rep(1:2, each = 10), 
+                  rep(paste("_", rep(1:10, 2))))
 
 vector = c(colnames(flexibilidad_pre)[1:6], col_items)
 
 colnames(flexibilidad_pre) = vector
 
-flexibilidad_pre = flexibilidad_pre[,1:32]
+flexibilidad_pre = flexibilidad_pre[,1:26]
 
 flexibilidad_pre = filter(flexibilidad_pre,
                        !is.na(`Código`),
-                       !is.na(`Item 1 _ 1`))
+                       !is.na(`Item 1 _ 1`),
+                       `Item 1 _ 1` != 'NULL')
 
 flexibilidad_pre[,col_items] = apply(flexibilidad_pre[,col_items], 2, 
                                      function(x) str_to_upper(x))
 
-claves_flexibilidad_pre = c('A', 'M', 'N', 'A', 'N', 'M', 'M', 'N', 'A',
-                            'A', 'N', 'M', 'N', 'N', '3', 'M', 'M',	'3',
-                            'N', 'N', 'M', '3', '3', 'M',	'N', 'M')
+claves_flexibilidad_pre = c('A','M','N','A','N','M','M','N',
+                            'A','A','N','3','M','M','3','N',
+                            'N','M','3','3')
 
 
-flexibilidad_pre[,7:32] = calificacion(flexibilidad_pre[,7:32],
+flexibilidad_pre[,7:26] = calificacion(flexibilidad_pre[,7:26],
                                        claves_flexibilidad_pre)
 
-flexibilidad_pre$`Aciertos item 1_pre` =  apply(flexibilidad_pre[,7:19], 1,
-                                                function(x) sum(x, na.rm= FALSE))
+flexibilidad_pre$`Aciertos item 1_pre` =  
+  apply(flexibilidad_pre[,7:16], 1,
+        function(x) sum(x, na.rm= FALSE))
 
-flexibilidad_pre$`Aciertos item 2_pre` =  apply(flexibilidad_pre[,20:32], 1,
-                                                function(x) sum(x, na.rm= FALSE))
+flexibilidad_pre$`Aciertos item 2_pre` =  
+  apply(flexibilidad_pre[,17:26], 1,
+        function(x) sum(x, na.rm= FALSE))
 
 # Post
 
@@ -3938,22 +4063,25 @@ flexibilidad_post = flexibilidad_post[,1:26]
 
 flexibilidad_post = filter(flexibilidad_post,
                        !is.na(`Código`),
-                       !is.na(`Item 1 _ 1`))
+                       !is.na(`Item 1 _ 1`),
+                       `Item 1 _ 1` != 'NULL')
 
 flexibilidad_post[,col_items] = apply(flexibilidad_post[,col_items], 2, 
                                       function(x) str_to_upper(x))
 
-claves_flexibilidad_post = c('F', 'S', 'E', 'E', 'F', 'S', 'F', 'E', 'F', 'S', 
-                             'S', '3', 'E', 'E', '3', 'S', 'S', '3', 'E', 'S')
+claves_flexibilidad_post = c('H','S','E','E','H','S','H','E','H','S','S',
+                             '3','E','E','3','S','S','3','E','S')
 
 flexibilidad_post[,7:26] = calificacion(flexibilidad_post[,7:26],
                                         claves_flexibilidad_post)
 
-flexibilidad_post$`Aciertos item 1_post` =  apply(flexibilidad_post[,7:16], 1,
-                                                  function(x) sum(x, na.rm= FALSE))
+flexibilidad_post$`Aciertos item 1_post` =  
+  apply(flexibilidad_post[,7:16], 1,
+        function(x) sum(x, na.rm= FALSE))
 
-flexibilidad_post$`Aciertos item 2_post` =  apply(flexibilidad_post[,17:26], 1,
-                                                  function(x) sum(x, na.rm= FALSE))
+flexibilidad_post$`Aciertos item 2_post` =  
+  apply(flexibilidad_post[,17:26], 1,
+        function(x) sum(x, na.rm= FALSE))
 ```
 
 #### Alpha
@@ -3961,13 +4089,13 @@ flexibilidad_post$`Aciertos item 2_post` =  apply(flexibilidad_post[,17:26], 1,
 ##### Pre
 
 ```{r}
-alpha(flexibilidad_pre[,20:32])
+alpha(flexibilidad_pre[,17:26])
 
-for(i in seq(length(colnames(flexibilidad_pre[,20:32])))){
-  x = alpha(flexibilidad_pre[,20:32][,-i])
+for(i in seq(length(colnames(flexibilidad_pre[,17:26])))){
+  x = alpha(flexibilidad_pre[,17:26][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(flexibilidad_pre[,20:32])[i]))
+              colnames(flexibilidad_pre[,17:26])[i]))
 }
 ```
 
@@ -3989,7 +4117,7 @@ for(i in seq(length(colnames(flexibilidad_post[,17:26])))){
 
 alfa = rbind(alfa,
              c("Flexibilidad - Pre",
-               alpha(flexibilidad_pre[,20:32])))
+               alpha(flexibilidad_pre[,17:26])))
 
 alfa = rbind(alfa,
              c("Flexibilidad - Post",
@@ -4002,7 +4130,7 @@ alfa = rbind(alfa,
 ##### Pre
 
 ```{r}
-analitem = item.exam(flexibilidad_pre[,20:32], discrim=T)
+analitem = item.exam(flexibilidad_pre[,17:26], discrim=T)
 analitem = dplyr::select(analitem, -c("Item.Criterion", "Item.Validity")) 
 cols_num = colnames(analitem[,1:6])
 analitem$Item = row.names(analitem)
@@ -4078,7 +4206,8 @@ flexibilidad_pre$Total_pre = min_max_scale(flexibilidad_pre$`Aciertos item 2_pre
 flexibilidad_post$Total_post = min_max_scale(flexibilidad_post$`Aciertos item 2_post`)
 
 pre_post = inner_join(flexibilidad_post, 
-                      dplyr::select(flexibilidad_pre, c("Código", "Total_pre")),
+                      dplyr::select(flexibilidad_pre, c("Código",
+                                                        "Total_pre")),
                       by = "Código")
 ```
 
@@ -4120,7 +4249,8 @@ lillie.test(pre_post$Total_post)
 ##### Descriptivos
 
 ```{r}
-summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre",
+                                                      "Total_post")])),
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
 summ$vars = c("Total_pre", "Total_post")
@@ -4165,7 +4295,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/flexibilidad.png")
+ggsave("../Plots/segunda_aplicacion/flexibilidad.png")
 ```
 
 ##### Tamaño del efecto
@@ -4210,42 +4340,29 @@ comparaciones = rbind(comparaciones, data_temp)
 
 socioemocional_pre = read_sheet(url_pre, sheet = "Socioemocional")
 
-socioemocional_pre = socioemocional_pre[,1:17]
-
-col_items = paste(rep("Situación", 11), c(rep(1, 3), 
-                  rep(2:3, each = 4)), paste("Item", 1:11))
-
-vector = c(colnames(socioemocional_pre)[1:6], col_items)
-
-colnames(socioemocional_pre) = vector
+socioemocional_pre = socioemocional_pre[,1:15]
 
 socioemocional_pre = filter(socioemocional_pre,
                        !is.na(`Código`),
-                       !is.na(`Situación 1 Item 1`),
-                       `Situación 1 Item 1` != 'NULL')
+                       !is.na(`1`),
+                       `1` != 'NULL')
 
-socioemocional_pre[,7:17] = apply(socioemocional_pre[,7:17], 2, 
+socioemocional_pre[,7:15] = apply(socioemocional_pre[,7:15], 2, 
                                   function(x) str_to_upper(x))
 
 #Post
 
 socioemocional_post = read_sheet(url_post, sheet = "Socioemocional")
 
-socioemocional_post = socioemocional_post[,1:16]
-
-col_items = socioemocional_post[1,7:16]
-
-vector = c(colnames(socioemocional_post)[1:6], col_items)
-
-colnames(socioemocional_post) = vector
+socioemocional_post = socioemocional_post[,1:15]
 
 socioemocional_post = filter(socioemocional_post,
                        !is.na(`Código`),
-                       !is.na(`1(flor)`),
+                       !is.na(`1`),
 #                       !is.na(`Nombre del estudiante`),
-                       `1(flor)` != 'NULL')
+                       `1` != 'NULL')
 
-socioemocional_post[,7:16] = apply(socioemocional_post[,7:16], 2, 
+socioemocional_post[,7:15] = apply(socioemocional_post[,7:15], 2, 
                                    function(x) str_to_upper(x))
 
 socioemocional_post$Código = as.character(socioemocional_post$Código)
@@ -4260,38 +4377,34 @@ En esta ocasión haremos una base individual para cada constructo pero adicional
 # Pre
 
 socio_reconocimiento_pre = as_tibble(socioemocional_pre) %>%
-  dplyr::select(`Código`,
-                `Situación 1 Item 1`,
-                `Situación 2 Item 4`,
-                `Situación 2 Item 6`,
-                `Situación 3 Item 8`,
-                `Situación 3 Item 11`)
+  dplyr::select(`Código`,"3", "5", "7")
 
 
-claves_reconocimiento_pre = c("C", "A", "C", "A", "A")
+claves_reconocimiento_pre = c("A", "C", "A")
 
-socio_reconocimiento_pre[,2:6] = calificacion(data = socio_reconocimiento_pre[,2:6],
-                                              claves = claves_reconocimiento_pre)
+socio_reconocimiento_pre[,2:4] = 
+  calificacion(data = socio_reconocimiento_pre[,2:4],
+               claves = claves_reconocimiento_pre)
 
-socio_reconocimiento_pre[,2:6] = as.data.frame(apply(socio_reconocimiento_pre[,2:6],
-                                                     2, function(x) as.numeric(x)))
+socio_reconocimiento_pre[,2:4] = 
+  as.data.frame(apply(socio_reconocimiento_pre[,2:4],
+                      2, function(x) as.numeric(x)))
 
 # Post
 
 socio_reconocimiento_post = as_tibble(socioemocional_post) %>%
-  dplyr::select(`Código`,
-                `2(estrella)`,
-                `5(pelota)`,
-                `7(flecha)`,
-                `8(cruz)`)
+  dplyr::select(`Código`, "4", "6", "7")
 
 
-claves_reconocimiento_post = c("D", "A", "C", "B")
+claves_reconocimiento_post = c("A", "C", "B")
 
-socio_reconocimiento_post[,2:5] = calificacion(data = socio_reconocimiento_post[,2:5],
-                                               claves = claves_reconocimiento_post)
+socio_reconocimiento_post[,2:4] = 
+  calificacion(data = socio_reconocimiento_post[,2:4],
+               claves = claves_reconocimiento_post)
 
-socio_reconocimiento_post[,2:5] = as.data.frame(apply(socio_reconocimiento_post[,2:5], 2, function(x) as.numeric(x)))
+socio_reconocimiento_post[,2:4] =
+  as.data.frame(apply(socio_reconocimiento_post[,2:4], 2, 
+                      function(x) as.numeric(x)))
 
 ##############################################################################
 # Calificiación Regulación
@@ -4299,16 +4412,23 @@ socio_reconocimiento_post[,2:5] = as.data.frame(apply(socio_reconocimiento_post[
 # pre
 
 regulacion_pre = as_tibble(socioemocional_pre) %>%
-  dplyr::select(`Código`,
-                `Situación 1 Item 2`,
-                `Situación 2 Item 7`,
-                `Situación 3 Item 9`)
+  dplyr::select(`Código`, "1", "4", "8")
 
 
-regulacion_pre[2:4] = as.data.frame(apply(regulacion_pre[2:4], 2, function(x) 
-                                    str_replace_all(x, c("A" = "1", "B" = "1",
-                                                         "C" = "0", "D" = "0",
-                                                         "X" = "", "O" = ""))))
+regulacion_pre$`1` = str_replace_all(regulacion_pre$`1`, 
+                                      c("A" = "1", "B" = "1",
+                                        "C" = "0", "D" = "0",
+                                        "X" = "", "O" = ""))
+
+regulacion_pre$`4` = str_replace_all(regulacion_pre$`4`, 
+                                      c("A" = "1", "B" = "0",
+                                        "C" = "0", "D" = "1",
+                                        "X" = "", "O" = ""))
+
+regulacion_pre$`8`= str_replace_all(regulacion_pre$`8`, 
+                                      c("A" = "1", "B" = "1",
+                                        "C" = "0", "D" = "0",
+                                        "X" = "", "O" = ""))
 
 
 regulacion_pre[2:4] = as.data.frame(apply(regulacion_pre[2:4], 2, 
@@ -4317,26 +4437,23 @@ regulacion_pre[2:4] = as.data.frame(apply(regulacion_pre[2:4], 2,
 # post
 
 regulacion_post = as_tibble(socioemocional_post) %>%
-  dplyr::select(`Código`,
-                `1(flor)`,
-                `4(pulgar)`,
-                `10(arbol)`)
+  dplyr::select(`Código`, "1", "3", "8")
 
 
-regulacion_post$`1(flor)` = str_replace_all(regulacion_post$`1(flor)`, 
-                                            c("A" = "0", "B" = "0",
-                                              "C" = "1", "D" = "1",
-                                              "X" = "", "O" = ""))
+regulacion_post$`1` = str_replace_all(regulacion_post$`1`, 
+                                      c("A" = "0", "B" = "0",
+                                        "C" = "1", "D" = "1",
+                                        "X" = "", "O" = ""))
 
-regulacion_post$`4(pulgar)` = str_replace_all(regulacion_post$`4(pulgar)`, 
-                                            c("A" = "1", "B" = "1",
-                                              "C" = "0", "D" = "0",
-                                              "X" = "", "O" = ""))
+regulacion_post$`3` = str_replace_all(regulacion_post$`3`, 
+                                      c("A" = "1", "B" = "1",
+                                        "C" = "0", "D" = "0",
+                                        "X" = "", "O" = ""))
 
-regulacion_post$`10(arbol)`= str_replace_all(regulacion_post$`10(arbol)`, 
-                                            c("A" = "1", "B" = "0",
-                                              "C" = "0", "D" = "1",
-                                              "X" = "", "O" = ""))
+regulacion_post$`8`= str_replace_all(regulacion_post$`8`, 
+                                      c("A" = "0", "B" = "1",
+                                        "C" = "0", "D" = "1",
+                                        "X" = "", "O" = ""))
 
 regulacion_post[2:4] = as.data.frame(apply(regulacion_post[2:4], 2, 
                                            function(x) as.numeric(x)))
@@ -4347,26 +4464,23 @@ regulacion_post[2:4] = as.data.frame(apply(regulacion_post[2:4], 2,
 # pre
 
 expresion_pre = as_tibble(socioemocional_pre) %>%
-  dplyr::select(`Código`,
-                `Situación 1 Item 3`,
-                `Situación 2 Item 5`,
-                `Situación 3 Item 10`)
+  dplyr::select(`Código`, "2", "6", "9")
 
 
-expresion_pre$`Situación 1 Item 3` = str_replace_all(expresion_pre$`Situación 1 Item 3`, 
-                                                     c("A" = "0", "B" = "1",
-                                                       "C" = "1", "D" = "0",
-                                                       "X" = "", "O" = ""))
+expresion_pre$`2` = str_replace_all(expresion_pre$`2`, 
+                                   c("A" = "0", "B" = "1",
+                                     "C" = "1", "D" = "0",
+                                     "X" = "", "O" = ""))
 
-expresion_pre$`Situación 2 Item 5` = str_replace_all(expresion_pre$`Situación 2 Item 5`, 
-                                                     c("A" = "1", "B" = "0",
-                                                       "C" = "0", "D" = "1",
-                                                       "X" = "", "O" = ""))
+expresion_pre$`6` = str_replace_all(expresion_pre$`6`, 
+                                   c("A" = "1", "B" = "1",
+                                     "C" = "0", "D" = "0",
+                                     "X" = "", "O" = ""))
 
-expresion_pre$`Situación 3 Item 10` = str_replace_all(expresion_pre$`Situación 3 Item 10`, 
-                                                      c("A" = "0", "B" = "0",
-                                                        "C" = "1", "D" = "1",
-                                                        "X" = "", "O" = ""))
+expresion_pre$`9` = str_replace_all(expresion_pre$`9`, 
+                                    c("A" = "1", "B" = "0",
+                                      "C" = "0", "D" = "1",
+                                      "X" = "", "O" = ""))
 
 
 expresion_pre[,2:4] = as.data.frame(apply(expresion_pre[,2:4], 2, 
@@ -4375,26 +4489,23 @@ expresion_pre[,2:4] = as.data.frame(apply(expresion_pre[,2:4], 2,
 # post
 
 expresion_post = as_tibble(socioemocional_post) %>%
-  dplyr::select(`Código`,
-                `3(luna)`,
-                `6(corazon)`,
-                `9(bus)`)
+  dplyr::select(`Código`, "2", "5", "9")
 
 
-expresion_post$`3(luna)` = str_replace_all(expresion_post$`3(luna)`, 
-                                           c("A" = "0", "B" = "1",
-                                             "C" = "0", "D" = "1",
-                                             "X" = "", "O" = ""))
+expresion_post$`2` = str_replace_all(expresion_post$`2`, 
+                                   c("A" = "0", "B" = "1",
+                                     "C" = "0", "D" = "1",
+                                     "X" = "", "O" = ""))
 
-expresion_post$`6(corazon)` = str_replace_all(expresion_post$`6(corazon)`, 
-                                              c("A" = "1", "B" = "0",
-                                                "C" = "0", "D" = "1",
-                                                "X" = "", "O" = ""))
+expresion_post$`5` = str_replace_all(expresion_post$`5`, 
+                                   c("A" = "1", "B" = "0",
+                                     "C" = "0", "D" = "1",
+                                     "X" = "", "O" = ""))
 
-expresion_post$`9(bus)` = str_replace_all(expresion_post$`9(bus)`, 
-                                          c("A" = "0", "B" = "1",
-                                            "C" = "0", "D" = "1",
-                                            "X" = "", "O" = ""))
+expresion_post$`9` = str_replace_all(expresion_post$`9`, 
+                                    c("A" = "1", "B" = "0",
+                                      "C" = "0", "D" = "1",
+                                      "X" = "", "O" = ""))
 
 
 expresion_post[,2:4] = as.data.frame(apply(expresion_post[,2:4], 2, 
@@ -4625,7 +4736,8 @@ regulacion_pre$Total_pre = min_max_scale(regulacion_pre$Total_pre)
 regulacion_post$Total_post = min_max_scale(regulacion_post$Total_post)
 
 pre_post = inner_join(regulacion_post, 
-                      dplyr::select(regulacion_pre, c("Código", "Total_pre")),
+                      dplyr::select(regulacion_pre, c("Código", 
+                                                      "Total_pre")),
                       by = "Código")
 ```
 
@@ -4713,7 +4825,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/socioemocionales_regulacion.png")
+ggsave("../Plots/segunda_aplicacion/socioemocionales_regulacion.png")
 ```
 
 ##### Tamaño del efecto
@@ -4754,10 +4866,10 @@ comparaciones = rbind(comparaciones, data_temp)
 #### Reconocimiento
 
 ```{r}
-socio_reconocimiento_pre$Total_pre = apply(socio_reconocimiento_pre[,2:6], 1,
+socio_reconocimiento_pre$Total_pre = apply(socio_reconocimiento_pre[,2:4], 1,
                                            function(x) sum(x, na.rm= FALSE))
 
-socio_reconocimiento_post$Total_post = apply(socio_reconocimiento_post[,2:5], 1,
+socio_reconocimiento_post$Total_post = apply(socio_reconocimiento_post[,2:4], 1,
                                              function(x) sum(x, na.rm= FALSE))
 
 socio_reconocimiento_pre$Total_pre =
@@ -4810,7 +4922,8 @@ lillie.test(pre_post$Total_post)
 ##### Descriptivos
 
 ```{r}
-summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
+summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre",
+                                                      "Total_post")])),
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
 summ$vars = c("Total_pre", "Total_post")
@@ -4855,7 +4968,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/socioemocionales_reconocimiento.png")
+ggsave("../Plots/segunda_aplicacion/socioemocionales_reconocimiento.png")
 ```
 
 ##### Tamaño del efecto
@@ -4994,7 +5107,7 @@ pre_post %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/socioemocionales_expresion.png")
+ggsave("../Plots/segunda_aplicacion/socioemocionales_expresion.png")
 ```
 
 ##### Tamaño del efecto
@@ -5073,7 +5186,7 @@ drop_na(alfa) %>%
 ```{r}
 # Exporte
 
-write.xlsx(drop_na(alfa), "../Data/processed/primera_aplicacion/alfa.xlsx", row.names = FALSE)
+write.xlsx(drop_na(alfa), "../Data/processed/segunda_aplicacion/alfa.xlsx", row.names = FALSE)
 ```
 
 
@@ -5107,7 +5220,7 @@ dplyr::select(descriptivos, -Area) %>%
 ```{r}
 # Exporte
 
-write.xlsx(descriptivos, "../Data/processed/primera_aplicacion/descriptivos.xlsx", row.names = FALSE)
+write.xlsx(descriptivos, "../Data/processed/segunda_aplicacion/descriptivos.xlsx", row.names = FALSE)
 ```
 
 ## Indicadores psicométricos
@@ -5150,7 +5263,7 @@ indicadores_psicometricos %>%
 # Exporte
 
 write.xlsx(indicadores_psicometricos,
-           "../Data/processed/primera_aplicacion/indicadores_psicometricos.xlsx",
+           "../Data/processed/segunda_aplicacion/indicadores_psicometricos.xlsx",
            row.names = FALSE)
 ```
 
@@ -5187,7 +5300,7 @@ comparaciones %>%
 # Exporte
 
 write.xlsx(comparaciones,
-           "../Data/processed/primera_aplicacion/pruebas_pre_post.xlsx",
+           "../Data/processed/segunda_aplicacion/pruebas_pre_post.xlsx",
            row.names = FALSE)
 ```
 
@@ -5218,7 +5331,7 @@ significativos %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/pruebas_significativas.png")
+ggsave("../Plots/segunda_aplicacion/pruebas_significativas.png")
 ```
 
 ### Actitudes hacia el lenguaje
@@ -5243,7 +5356,7 @@ significativos %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_lenguaje.png")
+ggsave("../Plots/segunda_aplicacion/significativas_lenguaje.png")
 ```
 
 ### Actitudes hacia las matemáticas
@@ -5268,7 +5381,7 @@ significativos %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_matematicas.png")
+ggsave("../Plots/segunda_aplicacion/significativas_matematicas.png")
 ```
 
 ### Motivación
@@ -5293,7 +5406,7 @@ significativos %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_motivacion.png")
+ggsave("../Plots/segunda_aplicacion/significativas_motivacion.png")
 ```
 
 
@@ -5319,7 +5432,7 @@ significativos %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_ejecutivas.png")
+ggsave("../Plots/segunda_aplicacion/significativas_ejecutivas.png")
 ```
 
 ### Habilidades socioemocionales
@@ -5344,12 +5457,12 @@ significativos %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_socioemocionales.png")
+ggsave("../Plots/segunda_aplicacion/significativas_socioemocionales.png")
 ```
 
 ### Diferencias entre ciudades
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 base = c("Código" , "Ciudad")
 
 data_ciudades = dplyr::select(actitudes_post, base)
@@ -5391,7 +5504,7 @@ pivot_ciudades_viz_2 %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_ciudades.png")
+ggsave("../Plots/segunda_aplicacion/significativas_ciudades.png")
 ```
 
 
@@ -5441,7 +5554,7 @@ pivot_ciclos_viz_2 %>%
 ```{r, message=FALSE}
 # Guardamos la imagen
 
-ggsave("../Plots/primera_aplicacion/significativas_ciclos.png")
+ggsave("../Plots/segunda_aplicacion/significativas_ciclos.png")
 ```
 
 \newpage
