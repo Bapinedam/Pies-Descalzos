@@ -1765,7 +1765,8 @@ motivacion_pre = filter(motivacion_pre,
 motivacion_pre[,7:16] = apply(motivacion_pre[,7:16], 2, 
                               function(x) str_to_upper(x))
 
-claves_motivacion_pre = c('B','A','A','B','B','B','B','B','A','A')
+claves_motivacion_pre = c('B','B','A','B','A','A','B','B','A','A')
+
 
 motivacion_pre[,7:16] = calificacion(motivacion_pre[,7:16],
                                       claves_motivacion_pre)
@@ -1782,7 +1783,7 @@ motivacion_post = filter(motivacion_post,
 motivacion_post[,7:16] = apply(motivacion_post[,7:16], 2, 
                                function(x) str_to_upper(x))
 
-claves_motivacion_post = c('B','B','A','B','A','A','B','B','A','A')
+claves_motivacion_post = c('B','A','A','B','B','B','B','B','A','A')
 
 motivacion_post[,7:16] = calificacion(motivacion_post[,7:16],
                                       claves_motivacion_post)
@@ -1801,10 +1802,10 @@ motivacion_post$Total_post = apply(motivacion_post[,7:16], 1,
 
 # Interés
 
-motivacion_pre$Interes_pre = apply(motivacion_pre[,c(7,10,13)], 1, 
+motivacion_pre$Interes_pre = apply(motivacion_pre[,c(8,11,14)], 1, 
                                    function(x) sum(x, na.rm= FALSE))
 
-motivacion_post$Interes_post = apply(motivacion_post[,c(8,11,14)], 1, 
+motivacion_post$Interes_post = apply(motivacion_post[,c(7,10,13)], 1, 
                                      function(x) sum(x, na.rm= FALSE))
 
 
@@ -1813,11 +1814,11 @@ motivacion_post$Interes_post = apply(motivacion_post[,c(8,11,14)], 1,
 # Orientación al aprendizaje
 
 motivacion_pre$OrientacionAprendizaje_pre = 
-  apply(motivacion_pre[,c(8,11,15)], 1,
+  apply(motivacion_pre[,c(9,12,15)], 1,
         function(x) sum(x, na.rm= FALSE))
 
 motivacion_post$OrientacionAprendizaje_post =
-  apply(motivacion_post[,c(9,12,15)], 1,
+  apply(motivacion_post[,c(8,11,15)], 1,
         function(x) sum(x, na.rm= FALSE))
 
 # Orientación al resultado
@@ -1831,11 +1832,11 @@ motivacion_post$OrientacionResultado_post =
 # Atribución interna
 
 motivacion_pre$AtribucionInterna_pre = 
-  apply(motivacion_pre[,c(9,16)], 1, 
+  apply(motivacion_pre[,c(13,16)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 motivacion_post$AtribucionInterna_post = 
-  apply(motivacion_post[,c(13,16)], 1, 
+  apply(motivacion_post[,c(9,16)], 1, 
         function(x) sum(x, na.rm= FALSE))
 
 # Atribución externa
@@ -1848,10 +1849,10 @@ motivacion_post$AtribucionExterna_post =
 
 # Expectativa
 
-motivacion_pre$Expectativa_pre = apply(motivacion_pre[,c(12, 14)], 1, 
+motivacion_pre$Expectativa_pre = apply(motivacion_pre[,c(7, 10)], 1, 
                                        function(x) sum(x, na.rm= FALSE))
 
-motivacion_post$Expectativa_post = apply(motivacion_post[,c(7, 10)], 1, 
+motivacion_post$Expectativa_post = apply(motivacion_post[,c(12, 14)], 1, 
                                          function(x) sum(x, na.rm= FALSE))
 
 columnas_pre = c("Total_pre",
@@ -1938,40 +1939,15 @@ for(i in seq(length(colnames(motivacion_post[,7:16])))){
 }
 ```
 
-Como podemos observar los valores en el alpha son bastante bajo y se debe al ruido que están generando algunos ítems, sobre todo los relacionados con interés y atribución. Una combinación que satisface los indicadores es
+Si bien el alfa del pre es bajo, en el post este sube
 
-#### Total pre
-
-```{r}
-alpha(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]])
-
-for(i in seq(length(colnames(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]])))){
-  x = alpha(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]][,-i])
-  print(paste("El índice de confiabilidad cambia a", x, 
-              "al eliminar el ítem", 
-              colnames(motivacion_pre[,c(7:16)[-c(1, 7, 3, 4, 10)]])[i]))
-}
-```
-
-#### Total post
-
-```{r}
-alpha(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]])
-
-for(i in seq(length(colnames(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]])))){
-  x = alpha(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]][,-i])
-  print(paste("El índice de confiabilidad cambia a", x, 
-              "al eliminar el ítem", 
-              colnames(motivacion_post[,c(7:16)[-c(2, 5, 6, 10)]])[i]))
-}
-```
 
 ```{r}
 # Amacenamos los valores
 
 alfa = rbind(alfa,
              c("Motivación pre",
-               alpha(motivacion_pre[,7:18])))
+               alpha(motivacion_pre[,7:16])))
 
 alfa = rbind(alfa,
              c("Motivación post",
@@ -1982,78 +1958,78 @@ alfa = rbind(alfa,
 #### Interés pre
 
 ```{r}
-alpha(motivacion_pre[,c(7,10,13)])
+alpha(motivacion_pre[,c(8,11,14)])
 
-for(i in seq(length(colnames(motivacion_pre[,c(7,10,13)])))){
-  x = alpha(motivacion_pre[,c(7,10,13)][,-i])
+for(i in seq(length(colnames(motivacion_pre[,c(8,11,14)])))){
+  x = alpha(motivacion_pre[,c(8,11,14)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_pre[,c(7,10,13)])[i]))
+              colnames(motivacion_pre[,c(8,11,14)])[i]))
 }
 ```
 
 #### Interés post
 
 ```{r}
-alpha(motivacion_post[,c(8,11,14)])
+alpha(motivacion_post[,c(7,10,13)])
 
-for(i in seq(length(colnames(motivacion_post[,c(8,11,14)])))){
-  x = alpha(motivacion_post[,c(8,11,14)][,-i])
+for(i in seq(length(colnames(motivacion_post[,c(7,10,13)])))){
+  x = alpha(motivacion_post[,c(7,10,13)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_post[,c(8,11,14)])[i]))
+              colnames(motivacion_post[,c(7,10,13)])[i]))
 }
 ```
 
 #### Metas pre
 
 ```{r}
-alpha(motivacion_pre[,c(8,11,15)])
+alpha(motivacion_pre[,c(9,12,15)])
 
-for(i in seq(length(colnames(motivacion_pre[,c(8,11,15)])))){
-  x = alpha(motivacion_pre[,c(8,11,15)][,-i])
+for(i in seq(length(colnames(motivacion_pre[,c(9,12,15)])))){
+  x = alpha(motivacion_pre[,c(9,12,15)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_pre[,c(8,11,15)])[i]))
+              colnames(motivacion_pre[,c(9,12,15)])[i]))
 }
 ```
 
 #### Metas post
 
 ```{r}
-alpha(motivacion_post[,c(9,12,15)])
+alpha(motivacion_post[,c(8,11,15)])
 
-for(i in seq(length(colnames(motivacion_post[,c(9,12,15)])))){
-  x = alpha(motivacion_post[,c(9,12,15)][,-i])
+for(i in seq(length(colnames(motivacion_post[,c(8,11,15)])))){
+  x = alpha(motivacion_post[,c(8,11,15)][,-i])
   print(paste("El índice de confiabilidad cambia a", x, 
               "al eliminar el ítem", 
-              colnames(motivacion_post[,c(9,12,15)])[i]))
+              colnames(motivacion_post[,c(8,11,15)])[i]))
 }
 ```
 
 #### Atribución interna pre
 
 ```{r}
-alpha(motivacion_pre[,c(9,16)])
+alpha(motivacion_pre[,c(13,16)])
 ```
 
 #### Atribución interna pre
 
 ```{r}
-alpha(motivacion_post[,c(13,16)])
+alpha(motivacion_post[,c(9,16)])
 ```
 No puede obtener el indicador al eliminar un ítem, ya que si queda un único ítem el indicador no tiene solución.
 
 #### Expectativa positiva pre
 
 ```{r}
-alpha(motivacion_pre[,c(12,14)])
+alpha(motivacion_pre[,c(7,10)])
 ```
 
-#### Expectativa positiva pre
+#### Expectativa positiva post
 
 ```{r}
-alpha(motivacion_post[,c(7,10)])
+alpha(motivacion_post[,c(12,14)])
 ```
 
 ### Indicadores psicométricos
