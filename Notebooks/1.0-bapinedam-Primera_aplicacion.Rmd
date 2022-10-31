@@ -10,7 +10,7 @@ fontsize: 11pt
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+#knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
@@ -2588,7 +2588,7 @@ Para funciones ejecutivas no se calcula un puntaje global, ya que cada test apun
 # Pre
 
 mem_audi_pre = read_sheet(url_pre, sheet = "Memoria Audi")
-vector = c(colnames(mem_audi_pre)[1:6], as.vector(unlist(mem_audi_pre[1,][7:34])))
+vector = c(colnames(mem_audi_pre)[1:6], as.vector(unlist(mem_audi_pre[1,][7:30])))
 colnames(mem_audi_pre) = vector
 mem_audi_pre = mem_audi_pre[-1,1:length(vector)]
 mem_audi_pre = filter(mem_audi_pre, 
@@ -2604,7 +2604,7 @@ item_2_pre = c("Oveja","Elefante","Tiburon" ,"Caracol",
 incorrectos_1_pre = c("León",	"Oso", "Ballena",	"Lagarto")
 incorrectos_2_pre = c("Mariposa", "Mono",	"Jirafa",	"Pantera")
 
-mem_audi_pre[,7:34] = apply(mem_audi_pre[,7:34], 2,
+mem_audi_pre[,7:30] = apply(mem_audi_pre[,7:30], 2,
                       function(x) str_replace_all(x,'NULL', '0'))
 
 mem_audi_pre$`Aciertos item 1_pre` = apply(apply(mem_audi_pre[,item_1_pre], 2,
@@ -2641,7 +2641,7 @@ mem_audi_pre$`Puntaje item 2_pre` = apply(mem_audi_pre[,"Puntaje item 2_pre"], 1
 # Post
 
 mem_audi_post = read_sheet(url_post, sheet = "Memoria Audi")
-vector = c(colnames(mem_audi_post)[1:6], as.vector(unlist(mem_audi_post[1,][7:34])))
+vector = c(colnames(mem_audi_post)[1:6], as.vector(unlist(mem_audi_post[1,][7:30])))
 colnames(mem_audi_post) = vector
 mem_audi_post = mem_audi_post[-1,1:length(vector)]
 mem_audi_post = filter(mem_audi_post, 
@@ -2658,7 +2658,7 @@ item_2_post = c("Estrella", "Gato", "Abeja",
 incorrectos_1_post = c("Perro",	"Cabra", "Avestruz",	"Hormiga")
 incorrectos_2_post = c("Toro", "Delfín",	"Loro",	"Camello")
 
-mem_audi_post[,7:34] = apply(mem_audi_post[,7:34], 2,
+mem_audi_post[,7:30] = apply(mem_audi_post[,7:30], 2,
                       function(x) str_replace_all(x,'NULL', '0'))
 
 mem_audi_post$`Aciertos item 1_post` = apply(apply(mem_audi_post[,item_1_post], 2,
@@ -5453,6 +5453,7 @@ sesion_info = devtools::session_info()
 dplyr::select(
   tibble::as_tibble(sesion_info$packages),
   c(package, loadedversion, source)
-)
+) %>%
+  gt()
 ```
 
