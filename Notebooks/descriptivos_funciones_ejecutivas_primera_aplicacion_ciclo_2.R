@@ -1,7 +1,7 @@
-## Obtención de descriptivos de la primera aplicación
+## ObtenciÃ³n de descriptivos de la primera aplicaciÃ³n
 
 ################################################################################
-## Librerías
+## LibrerÃ­as
 
 # Datos
 
@@ -12,7 +12,7 @@ library(dplyr)
 library(googlesheets4)
 library(stringr)
 
-# Análsis de datos
+# AnÃ¡lsis de datos
 library(likert)
 library(nortest)
 library(effsize)
@@ -42,7 +42,7 @@ options(digits=5, scipen = 50)
 set.seed(321)
 
 ###############################################################################
-# Obtención de datos
+# Obtenci?n de datos
 
 url_pre = paste("https://docs.google.com/spreadsheets/d",
                 "/1Ry73ckzruTQxtDnkCSscs16M3cv3u9XgJlcg4sN94BE/edit?usp=sharing",
@@ -63,17 +63,20 @@ mem_audi_pre = read_sheet(url_pre, sheet = "Memoria Audi")
 vector = c(colnames(mem_audi_pre)[1:6], as.vector(unlist(mem_audi_pre[1,][7:30])))
 colnames(mem_audi_pre) = vector
 mem_audi_pre = mem_audi_pre[-1,1:length(vector)]
+
+mem_audi_pre = filter(mem_audi_pre, Ciclo == 2) ## Filtro de ciclo
+
 mem_audi_pre = filter(mem_audi_pre, 
-                      !is.na(`Código`), 
+                      !is.na(`CÃ³digo`), 
                       !is.na(Vaca),
                       Vaca != 'NULL')
 item_1_pre = c("Caballo","Perro","Aguila","Pollito",
                "Foca","Vaca","Cocodrilo","Sapo")
 
 item_2_pre = c("Oveja","Elefante","Tiburon" ,"Caracol",
-               "Ratón" ,"Gato","Tortuga","Pez")
+               "RatÃ³n" ,"Gato","Tortuga","Pez")
 
-incorrectos_1_pre = c("León",	"Oso", "Ballena",	"Lagarto")
+incorrectos_1_pre = c("LeÃ³n",	"Oso", "Ballena",	"Lagarto")
 incorrectos_2_pre = c("Mariposa", "Mono",	"Jirafa",	"Pantera")
 
 mem_audi_pre[,7:30] = apply(mem_audi_pre[,7:30], 2,
@@ -116,8 +119,11 @@ mem_audi_post = read_sheet(url_post, sheet = "Memoria Audi")
 vector = c(colnames(mem_audi_post)[1:6], as.vector(unlist(mem_audi_post[1,][7:30])))
 colnames(mem_audi_post) = vector
 mem_audi_post = mem_audi_post[-1,1:length(vector)]
+
+mem_audi_post = filter(mem_audi_post, Ciclo == 2) ## Filtro de ciclo
+
 mem_audi_post = filter(mem_audi_post, 
-                       !is.na(`Código`), 
+                       !is.na(`CÃ³digo`), 
                        !is.na(Burro),
                        Burro != 'NULL')
 
@@ -128,7 +134,7 @@ item_2_post = c("Estrella", "Gato", "Abeja",
                 "Cebra", "Rana", "Armadillo", "Tortuga", "Iguana")
 
 incorrectos_1_post = c("Perro",	"Cabra", "Avestruz",	"Hormiga")
-incorrectos_2_post = c("Toro", "Delfín",	"Loro",	"Camello")
+incorrectos_2_post = c("Toro", "DelfÃ­n",	"Loro",	"Camello")
 
 mem_audi_post[,7:30] = apply(mem_audi_post[,7:30], 2,
                              function(x) str_replace_all(x,'NULL', '0'))
@@ -166,17 +172,17 @@ mem_audi_post$`Puntaje item 2_post` = apply(mem_audi_post[,"Puntaje item 2_post"
 ### Totales
 
 mem_audi_pre$Total_pre = mem_audi_pre$`Puntaje item 2_pre` +
-                          mem_audi_pre$`Puntaje item 1_pre`
+  mem_audi_pre$`Puntaje item 1_pre`
 
 mem_audi_post$Total_post = mem_audi_post$`Puntaje item 2_post` +
-                            mem_audi_post$`Puntaje item 1_post`
+  mem_audi_post$`Puntaje item 1_post`
 
 pre_post = inner_join(mem_audi_post, 
-                      dplyr::select(mem_audi_pre, c("Código", "Aciertos item 1_pre", 
+                      dplyr::select(mem_audi_pre, c("CÃ³digo", "Aciertos item 1_pre", 
                                                     "Errores item 1_pre",  "Aciertos item 2_pre",
                                                     "Errores item 2_pre","Puntaje item 1_pre",
                                                     "Puntaje item 2_pre", "Total_pre")),
-                      by = "Código")
+                      by = "CÃ³digo")
 
 summ = data.frame(unclass(psych::describe(pre_post[,c("Aciertos item 1_pre", 
                                                       "Errores item 1_pre",  "Aciertos item 2_pre",
@@ -209,8 +215,11 @@ mem_vis_pre = read_sheet(url_pre, sheet = "Memoria Vis")
 vector = c(colnames(mem_vis_pre)[1:6], as.vector(unlist(mem_vis_pre[1,][7:22])))
 colnames(mem_vis_pre) = vector
 mem_vis_pre = mem_vis_pre[-1,1:length(vector)]
+
+mem_vis_pre = filter(mem_vis_pre, Ciclo == 2) ## Filtro de ciclo
+
 mem_vis_pre = filter(mem_vis_pre,
-                     !is.na(`Código`),
+                     !is.na(`CÃ³digo`),
                      !is.na(Gym),
                      Gym != 'NULL')
 
@@ -218,10 +227,10 @@ mem_vis_pre[,7:22] = apply(mem_vis_pre[,7:22], 2,
                            function(x) str_replace_all(x,'NULL', '0'))
 
 item_1_pre = c("Gym","Museo","Cajas")
-item_2_pre = c("Salón","Aeropuerto","Iglesia")
+item_2_pre = c("SalÃ³n","Aeropuerto","Iglesia")
 
 incorrectos_1_pre = c("Cine",	"Lavadoras",	"Oficina")
-incorrectos_2_pre = c("Sala",		"Paradero",	"Café")
+incorrectos_2_pre = c("Sala",		"Paradero",	"CafÃ©")
 
 mem_vis_pre$`Aciertos item 1_pre` = apply(apply(mem_vis_pre[,item_1_pre], 2,
                                                 function(x) as.numeric(x)),
@@ -258,8 +267,11 @@ vector = c(colnames(mem_vis_post)[1:6], as.vector(unlist(mem_vis_post[1,][7:22])
 colnames(mem_vis_post) = vector
 
 mem_vis_post = mem_vis_post[-1,1:length(vector)]
+
+mem_vis_post = filter(mem_vis_post, Ciclo == 2) ## Filtro de ciclo
+
 mem_vis_post = filter(mem_vis_post,
-                      !is.na(`Código`),
+                      !is.na(`CÃ³digo`),
                       # !is.null(Cancha),
                       Iglesia != 'NULL')
 
@@ -303,17 +315,17 @@ mem_vis_post$`Puntaje item 2_post` = apply(mem_vis_post[,"Puntaje item 2_post"],
 ### Totales
 
 mem_vis_pre$Total_pre = mem_vis_pre$`Puntaje item 2_pre` +
-                         mem_vis_pre$`Puntaje item 1_pre`
+  mem_vis_pre$`Puntaje item 1_pre`
 
 mem_vis_post$Total_post = mem_vis_post$`Puntaje item 2_post` +
-                          mem_vis_post$`Puntaje item 1_post`
+  mem_vis_post$`Puntaje item 1_post`
 
 pre_post = inner_join(mem_vis_post, 
-                      dplyr::select(mem_vis_pre, c("Código", "Aciertos item 1_pre", 
-                                                    "Errores item 1_pre",  "Aciertos item 2_pre",
-                                                    "Errores item 2_pre","Puntaje item 1_pre",
-                                                    "Puntaje item 2_pre", "Total_pre")),
-                      by = "Código")
+                      dplyr::select(mem_vis_pre, c("CÃ³digo", "Aciertos item 1_pre", 
+                                                   "Errores item 1_pre",  "Aciertos item 2_pre",
+                                                   "Errores item 2_pre","Puntaje item 1_pre",
+                                                   "Puntaje item 2_pre", "Total_pre")),
+                      by = "CÃ³digo")
 
 summ = data.frame(unclass(psych::describe(pre_post[,c("Aciertos item 1_pre", 
                                                       "Errores item 1_pre",  "Aciertos item 2_pre",
@@ -338,11 +350,11 @@ summ$Prueba = "Memoria visual"
 
 descriptivos_primera_aplicacion = rbind(descriptivos_primera_aplicacion, summ)
 
-## Inhibición
+## InhibiciÃ³n
 
 ### Pre
 
-inhibicion_pre = read_sheet(url_pre, sheet = "Inhibiciòn")
+inhibicion_pre = read_sheet(url_pre, sheet = "InhibiciÃ²n")
 
 col_items = paste(rep("Item", 26), rep(1:2, each = 13), 
                   rep(paste("_", rep(1:13, 2))))
@@ -352,8 +364,10 @@ colnames(inhibicion_pre) = vector
 
 inhibicion_pre = inhibicion_pre[,1:32]
 
+inhibicion_pre = filter(inhibicion_pre, Ciclo == 2) ## Filtro de ciclo
+
 inhibicion_pre = filter(inhibicion_pre,
-                        !is.na(`Código`),
+                        !is.na(`CÃ³digo`),
                         !is.na(`Item 1 _ 1`))
 
 inhibicion_pre[,col_items] = apply(inhibicion_pre[,col_items], 2, 
@@ -376,7 +390,7 @@ inhibicion_pre$`Aciertos item 2_pre` =  apply(inhibicion_pre[,20:32], 1,
 
 ### Post
 
-inhibicion_post = read_sheet(url_post, sheet = "Inhibición")
+inhibicion_post = read_sheet(url_post, sheet = "InhibiciÃ³n")
 
 col_items = paste(rep("Item", 20), rep(1:2, each = 10), 
                   rep(paste("_", rep(1:10, 2))))
@@ -386,8 +400,10 @@ colnames(inhibicion_post) = vector
 
 inhibicion_post = inhibicion_post[,1:26]
 
+inhibicion_post = filter(inhibicion_post, Ciclo == 2) ## Filtro de ciclo
+
 inhibicion_post = filter(inhibicion_post,
-                         !is.na(`Código`),
+                         !is.na(`CÃ³digo`),
                          !is.na(`Item 1 _ 1`))
 
 inhibicion_post[,col_items] = apply(inhibicion_post[,col_items], 2, 
@@ -411,15 +427,15 @@ inhibicion_pre$Total_pre = inhibicion_pre$`Aciertos item 2_pre`
 inhibicion_post$Total_post = inhibicion_post$`Aciertos item 2_post`
 
 pre_post = inner_join(inhibicion_post, 
-                      dplyr::select(inhibicion_pre, c("Código", "Total_pre")),
-                      by = "Código")
+                      dplyr::select(inhibicion_pre, c("CÃ³digo", "Total_pre")),
+                      by = "CÃ³digo")
 
 summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
                   check.names = FALSE, stringsAsFactors = FALSE) 
 
 summ$vars = c("Total_pre", "Total_post")
 
-summ$Prueba = "Inhibición"
+summ$Prueba = "InhibiciÃ³n"
 
 descriptivos_primera_aplicacion = rbind(descriptivos_primera_aplicacion, summ)
 
@@ -438,8 +454,10 @@ colnames(flexibilidad_pre) = vector
 
 flexibilidad_pre = flexibilidad_pre[,1:32]
 
+flexibilidad_pre = filter(flexibilidad_pre, Ciclo == 2) ## Filtro de ciclo
+
 flexibilidad_pre = filter(flexibilidad_pre,
-                          !is.na(`Código`),
+                          !is.na(`CÃ³digo`),
                           !is.na(`Item 1 _ 1`))
 
 flexibilidad_pre[,col_items] = apply(flexibilidad_pre[,col_items], 2, 
@@ -472,8 +490,10 @@ colnames(flexibilidad_post) = vector
 
 flexibilidad_post = flexibilidad_post[,1:26]
 
+flexibilidad_post = filter(flexibilidad_post, Ciclo == 2) ## Filtro de ciclo
+
 flexibilidad_post = filter(flexibilidad_post,
-                           !is.na(`Código`),
+                           !is.na(`CÃ³digo`),
                            !is.na(`Item 1 _ 1`))
 
 flexibilidad_post[,col_items] = apply(flexibilidad_post[,col_items], 2, 
@@ -497,8 +517,8 @@ flexibilidad_pre$Total_pre = flexibilidad_pre$`Aciertos item 2_pre`
 flexibilidad_post$Total_post = flexibilidad_post$`Aciertos item 2_post`
 
 pre_post = inner_join(flexibilidad_post, 
-                      dplyr::select(flexibilidad_pre, c("Código", "Total_pre")),
-                      by = "Código")
+                      dplyr::select(flexibilidad_pre, c("CÃ³digo", "Total_pre")),
+                      by = "CÃ³digo")
 
 summ = data.frame(unclass(psych::describe(pre_post[,c("Total_pre", "Total_post")])),
                   check.names = FALSE, stringsAsFactors = FALSE) 
@@ -513,5 +533,5 @@ descriptivos_primera_aplicacion = rbind(descriptivos_primera_aplicacion, summ)
 #Exporte final
 
 write.xlsx(descriptivos_primera_aplicacion, 
-           "../Data/processed/primera_aplicacion/Descriptivos Primera Aplicación - Funciones ejecutivas.xlsx", 
+           "../Data/processed/primera_aplicacion/Descriptivos Primera AplicaciÃ³n - Funciones ejecutivas.xlsx", 
            row.names = FALSE)
